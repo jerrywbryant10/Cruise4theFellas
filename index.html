@@ -137,6 +137,10 @@
   .pick .actions { margin-top: auto; }
   .cheap { margin-bottom: 14px; border-color: var(--olive-2); display: flex; gap: 12px 18px; align-items: center; flex-wrap: wrap; font-size: 14px; color: #cfdbe6; }
   .cheap b { color: #fff; font-size: 17px; }
+  .savebar { display: grid; gap: 10px; margin-bottom: 14px; }
+  .savebar .toggle { align-items: flex-start; font-size: 14px; color: #cfdbe6; }
+  .savebar .toggle input { margin-top: 2px; flex: none; }
+  .savebar b { color: var(--sand); }
   .cheap .amt { font-family: "Black Ops One"; color: var(--sunset); font-size: 22px; }
   .when.best { border-color: var(--sunset); box-shadow: 0 0 0 1px var(--sunset) inset; }
   .when.skip { opacity: .72; }
@@ -342,8 +346,12 @@
         <div>
           <div class="tag">Top picks for the 6 of us</div>
           <h2>Best bang for the buck</h2>
-          <p>Each price is what one man pays for everything: room, tips, drink package, Wi-Fi, gas, hotel the night before and spending money.</p>
+          <p>Each price is what one man pays for everything: room, tips, drink package, Wi-Fi, gas, hotel the night before and spending money. The room itself is the cheap part. Flip on Budget mode to see the bare-bones price.</p>
         </div>
+      </div>
+      <div class="card savebar">
+        <label class="toggle"><input type="checkbox" id="budget"> <span><b>💵 Budget mode:</b> skip the drink package, Wi-Fi and paid excursions</span></label>
+        <label class="toggle"><input type="checkbox" id="mil"> <span><b>🎖 We're vets:</b> take off the military discount where it's a set amount (Norwegian 10%, Virgin 15%, MSC 5–10%). Carnival and Royal Caribbean vary, so ask.</span></label>
       </div>
       <div class="card cheap" id="cheapest"></div>
       <div class="picks" id="picksGrid"></div>
@@ -721,14 +729,24 @@ function inputs() {
   const v = {}; INPUTS.forEach(k => v[k] = Math.max(0, parseFloat($("#"+k).value) || 0));
   v.group = Math.max(1, v.group); v.mpg = Math.max(1, v.mpg); v.riders = Math.max(1, v.riders);
   v.travel = $("#travel").value;
-  v.drinks = $("#drinks").checked; v.wifi = $("#wifi").checked;
+  v.drinks = $("#drinks").checked; v.wifi = $("#wifi").checked; v.mil = $("#mil").checked;
   return v;
+}
+
+// Military discounts that are a set percentage; Carnival and Royal Caribbean vary by sailing
+function milPct(line, room) {
+  if (line === "Norwegian (NCL)") return 10;
+  if (line === "Virgin Voyages") return 15;
+  if (line === "MSC Cruises") return room.inside ? 5 : 10;
+  return 0;
 }
 
 // fareMult: 2 for a solo cabin (single supplement ≈ paying for a second guest)
 function costFor(room, v, fareMult = 1) {
   const s = sailById(room.sail), x = EXTRAS[s.line];
-  const fare = (quotes[room.id] > 0 ? quotes[room.id] : room.est) * fareMult;
+  const quoted = quotes[room.id] > 0;
+  const off = v.mil && !quoted ? milPct(s.line, room) : 0;
+  const fare = (quoted ? quotes[room.id] : room.est) * (1 - off / 100) * fareMult;
   const tips = (room.suite ? x.tipSuite : x.tip) * s.nights;
   const drinks = v.drinks ? x.pkgDay * s.nights : 0;
   const wifi = v.wifi ? x.wifi * s.nights : 0;
@@ -739,7 +757,7 @@ function costFor(room, v, fareMult = 1) {
   const parkCost = fly ? 0 : v.parking * (s.nights + 1) / v.riders;
   const other = v.excursions + flightCost + gasCost + parkCost + v.hotel + v.insurance + v.spending;
   const allin = fare + tips + drinks + wifi + other;
-  return { s, x, fare, tips, drinks, wifi, flightCost, gasCost, parkCost, other, allin, share: fare + tips + drinks + wifi, perNight: allin / s.nights, group: allin * v.group };
+  return { s, x, off, fare, tips, drinks, wifi, flightCost, gasCost, parkCost, other, allin, share: fare + tips + drinks + wifi, perNight: allin / s.nights, group: allin * v.group };
 }
 
 function renderRoomSelect() {
@@ -759,6 +777,7 @@ function selectRoom(id) {
 
 function recalc() {
   const v = inputs();
+  $("#budget").checked = !v.drinks && !v.wifi && v.excursions === 0;
   renderPicks(v);
   renderPorts(v);
   renderWhen(v);
@@ -774,7 +793,7 @@ function recalc() {
   $("#roomNote").hidden = !note; $("#roomNote").textContent = note;
 
   const rows = [
-    ["Room" + (quotes[room.id] > 0 ? " (your price)" : " (our estimate)"), c.fare],
+    ["Room" + (quotes[room.id] > 0 ? " (your price)" : " (our estimate" + (c.off ? `, ${c.off}% vet discount` : "") + ")"), c.fare],
     ["Tips for the crew", c.tips],
     ["Drink package (" + c.x.pkg + ")", c.drinks],
     ["Wi-Fi", c.wifi],
@@ -793,7 +812,7 @@ function recalc() {
   $("#totNight").textContent = money(c.perNight);
   $("#totGroup").textContent = money(c.group);
 
-  store.set("calc", { room: room.id, inputs: Object.fromEntries(INPUTS.map(k => [k, $("#"+k).value])), drinks: v.drinks, wifi: v.wifi, travel: v.travel });
+  store.set("calc", { room: room.id, inputs: Object.fromEntries(INPUTS.map(k => [k, $("#"+k).value])), drinks: v.drinks, wifi: v.wifi, travel: v.travel, mil: v.mil });
   renderCompare(v, room.id);
   document.querySelectorAll("[data-fly]").forEach(el => el.hidden = v.travel !== "fly");
   document.querySelectorAll("[data-drive]").forEach(el => el.hidden = v.travel === "fly");
@@ -810,7 +829,15 @@ $("#quote").addEventListener("input", e => {
   if (n > 0) quotes[id] = n; else delete quotes[id];
   store.set("quotes", quotes); recalc();
 });
-[...INPUTS, "drinks", "wifi", "travel"].forEach(k => $("#"+k).addEventListener("input", recalc));
+[...INPUTS, "drinks", "wifi", "travel", "mil"].forEach(k => $("#"+k).addEventListener("input", recalc));
+let excursionsBefore = "150";
+$("#budget").addEventListener("change", e => {
+  const on = e.target.checked;
+  $("#drinks").checked = $("#wifi").checked = !on;
+  if (on) { excursionsBefore = $("#excursions").value; $("#excursions").value = 0; }
+  else $("#excursions").value = +excursionsBefore > 0 ? excursionsBefore : 150;
+  recalc();
+});
 
 // ---------- compare ----------
 let sortKey = "allin", sortDir = 1;
@@ -890,7 +917,7 @@ function renderWhen(v) {
   const rows = WINDOWS.map(w => {
     const sails = w.sails.map(sailById).filter(Boolean);
     if (!sails.some(s => s.fare)) return null;
-    const cheap = best(sails.filter(s => s.fare).map(s => ({ id: s.id, sail: s.id, type: cabinLabel(s.cabin), beds: 0, rooms: 3, est: s.fare, suite: false })), v, 1);
+    const cheap = best(sails.filter(s => s.fare).map(s => ({ id: s.id, sail: s.id, type: cabinLabel(s.cabin), beds: 0, rooms: 3, est: s.fare, suite: false, inside: s.cabin === "Inside" })), v, 1);
     return { w, sails, cheap, off: [...new Set(sails.map(workdaysOff))].sort((a, b) => a - b).filter((x, i, a) => i === 0 || i === a.length - 1).join("–"), nights: [...new Set(sails.map(s => s.nights))].sort().join("–") };
   }).filter(Boolean);
   if (!rows.length) { $("#whenGrid").innerHTML = NONE_LEFT; return; }
@@ -922,11 +949,12 @@ const NONE_LEFT = `<div class="card" style="color:var(--muted)">Every sailing on
 const NO_ROOMS = `<div class="card" style="color:var(--muted)">None of the room options leave more than 90 days out anymore, so it's too late to book them.</div>`;
 function renderPicks(v) {
   if (!SAILINGS.length) { $("#cheapest").innerHTML = NONE_LEFT; $("#picksGrid").innerHTML = ""; $("#sixTogether").hidden = true; return; }
-  const cheap = best(SAILINGS.filter(s => s.fare).map(s => ({ id: s.id, sail: s.id, type: cabinLabel(s.cabin), beds: 0, rooms: 3, est: s.fare, suite: false })), v, 1);
+  const cheap = best(SAILINGS.filter(s => s.fare).map(s => ({ id: s.id, sail: s.id, type: cabinLabel(s.cabin), beds: 0, rooms: 3, est: s.fare, suite: false, inside: s.cabin === "Inside" })), v, 1);
   const cs = cheap.c.s;
   $("#cheapest").innerHTML = `<span class="dogtag">CHEAPEST WAY TO GO</span>
     <div><b>${esc(cs.ship)}</b> · ${esc(cs.line)}<br><span style="color:var(--muted)">${fmtDate(cs.depart)} → ${fmtDate(cs.ret)} · ${cs.nights} nights · ${esc(cs.port)} · ${esc(cabinLabel(cs.cabin))}, 2 guys each</span></div>
-    <div class="amt">${money(cheap.c.allin)}<span style="font:12px Inter;color:var(--muted)"> per man, everything in</span></div>`;
+    <div class="amt">${money(cheap.c.allin)}<span style="font:12px Inter;color:var(--muted)"> per man, everything in</span>
+      <div style="font:13px Inter;color:var(--muted);margin-top:4px">Room + tips only: <b style="font-size:14px;color:var(--sand)">${money(cheap.c.fare + cheap.c.tips)}</b></div></div>`;
   $("#picksGrid").innerHTML = BUNK.map((b, i) => {
     const pool = ROOMS.filter(b.filter);
     const pick = best(pool.filter(r => !r.inside), v, b.mult) || best(pool, v, b.mult);
@@ -940,7 +968,7 @@ function renderPicks(v) {
       <div class="meta">${fmtDate(c.s.depart)} → ${fmtDate(c.s.ret)} <span>·</span> ${c.s.nights} nights <span>·</span> ${esc(c.s.port)}</div>
       <div class="pills"><span class="pill ${cls}">${lbl}</span></div>
       <div class="big">${money(c.allin)}<small>per man, everything in</small></div>
-      <div class="grp">Room alone ${money(c.fare)} · All 6 of us: <b>${money(c.allin * 6)}</b></div>
+      <div class="grp">Room + tips only: <b>${money(c.fare + c.tips)}</b> · All 6 of us: <b>${money(c.allin * 6)}</b></div>
       <div class="why">${esc(b.why)}</div>
       ${b.mult === 1 ? `<div class="actions"><button class="btn ghost" type="button" data-pick="${r.id}">Run the numbers →</button></div>` : ""}
     </article>`;
@@ -1078,6 +1106,7 @@ if (state) {
   Object.entries(state.inputs || {}).forEach(([k, v]) => { if ($("#"+k)) $("#"+k).value = v; });
   $("#drinks").checked = state.drinks !== false; $("#wifi").checked = state.wifi !== false;
   if (state.travel) $("#travel").value = state.travel;
+  $("#mil").checked = !!state.mil;
 }
 if (home) { $("#homeIn").value = home.name; $("#homeMsg").textContent = `Showing drives from ${home.name}.`; }
 const startRoom = [state?.room, "R2", ROOMS[0]?.id].find(id => ROOMS.some(r => r.id === id));
