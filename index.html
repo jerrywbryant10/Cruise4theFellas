@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cruise 4 the Fellas</title>
-<meta name="description" content="March 2027 guys' cruise planner: sailings, suites, all-in cost calculator, military deals, checklist and payment tracker.">
+<meta name="description" content="March 2027 guys' cruise planner: sailings, suites, all-in cost calculator, military deals and booking checklist.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -110,13 +110,34 @@
   }
   .dedication h3 { font-size: 22px; color: var(--sand); text-transform: uppercase; }
   .dedication p { margin: 6px 0 0; color: #cfdbe6; }
-  .roster { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
   .dogtag {
     font-family: "Black Ops One"; font-size: 13px; letter-spacing: .06em;
     background: linear-gradient(180deg, #c9ccd1, #8e939a); color: #1b2128;
     padding: 6px 14px 6px 22px; border-radius: 10px 18px 18px 10px; position: relative;
   }
   .dogtag::before { content: ""; position: absolute; left: 8px; top: 50%; width: 6px; height: 6px; margin-top: -3px; border-radius: 50%; background: var(--navy); }
+
+  /* Top picks */
+  .picks { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+  .pick { display: flex; flex-direction: column; gap: 10px; position: relative; overflow: hidden; }
+  .pick::after {
+    content: attr(data-rank); position: absolute; right: 14px; top: 6px;
+    font-family: "Black Ops One"; font-size: 64px; line-height: 1; color: rgba(232,217,181,.07);
+  }
+  .pick .dogtag { align-self: flex-start; }
+  .pick h3 { font-size: 24px; color: #fff; }
+  .pick .room { color: var(--sand); font-family: Oswald; font-size: 16px; }
+  .pick .meta { color: #cfdbe6; font-size: 14px; }
+  .pick .meta span { color: var(--muted); }
+  .pick .big { font-family: "Black Ops One"; font-size: 40px; color: var(--sunset); line-height: 1; margin-top: 4px; }
+  .pick .big small { font-family: Inter; font-size: 12px; color: var(--muted); margin-left: 6px; }
+  .pick .grp { color: var(--muted); font-size: 13px; }
+  .pick .grp b { color: var(--sand); }
+  .pick .why { font-size: 13px; color: #cfdbe6; border-top: 1px dashed var(--line); padding-top: 10px; }
+  .pick .actions { margin-top: auto; }
+  .six { margin-top: 14px; display: flex; gap: 12px 18px; align-items: center; flex-wrap: wrap; font-size: 14px; color: #cfdbe6; }
+  .six b { color: var(--sand); }
+  .six .amt { font-family: "Black Ops One"; color: var(--sunset); font-size: 22px; }
 
   /* Filters */
   .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
@@ -223,11 +244,6 @@
   .check.overdue .due { color: var(--red); }
   .check.soon .due { color: var(--sunset); }
 
-  /* Payments */
-  .pay input[type=text], .pay input[type=number] { padding: 7px 8px; min-width: 90px; }
-  .pay td { vertical-align: middle; }
-  .bal-pos { color: var(--sunset); font-weight: 600; }
-  .bal-zero { color: var(--olive-2); font-weight: 600; }
   .fine { color: var(--muted); font-size: 12px; margin-top: 10px; }
 
   footer { padding: 40px 0 60px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); }
@@ -256,13 +272,13 @@
   <div class="wrap">
     <a class="brand" href="#top">C4TF</a>
     <div class="links">
+      <a href="#picks">Top 3</a>
       <a href="#sailings">Sailings</a>
       <a href="#calc">Calculator</a>
       <a href="#compare">Compare</a>
       <a href="#intel">Deals</a>
       <a href="#movement">Getting There</a>
       <a href="#checklist">Checklist</a>
-      <a href="#payments">Payments</a>
     </div>
   </div>
 </nav>
@@ -290,9 +306,22 @@
         <div>
           <h3>Brothers in arms. Brothers at sea.</h3>
           <p>We deployed together to Afghanistan and Iraq on our first one, and the history goes back a long way. This trip is for the guys who were there. Book it before someone gets voluntold for another deployment.</p>
-          <div class="roster" id="roster"></div>
         </div>
       </div>
+    </div>
+  </section>
+
+  <section id="picks">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <div class="tag">Top 3 · Best bets for 6</div>
+          <h2>How do we bunk?</h2>
+          <p>The cheapest all-in option per man for each way of splitting rooms. These update with the calculator inputs below.</p>
+        </div>
+      </div>
+      <div class="picks" id="picksGrid"></div>
+      <div class="card six" id="sixTogether"></div>
     </div>
   </section>
 
@@ -373,7 +402,7 @@
               <thead><tr><th>Cost item</th><th class="num">Per person</th><th class="num">Group</th></tr></thead>
               <tbody id="breakdown"></tbody>
             </table>
-            <div class="fine">*Cruise share = fare + tips + drinks + Wi-Fi. It's what the Payment Tracker uses.</div>
+            <div class="fine">*Cruise share = fare + tips + drinks + Wi-Fi, the part you pay the cruise line.</div>
           </div>
         </div>
       </div>
@@ -451,28 +480,6 @@
     </div>
   </section>
 
-  <section id="payments">
-    <div class="wrap">
-      <div class="sec-head">
-        <div>
-          <div class="tag">07 · Payments</div>
-          <h2>Who's paid what</h2>
-          <p>Each man's share comes from the calculator's cruise share for the room you picked. Enter names and payments below. They're saved in this browser only.</p>
-        </div>
-        <div style="display:flex; gap:8px">
-          <button class="btn ghost" id="addRow" type="button">+ Add a man</button>
-          <button class="btn ghost" id="resetPay" type="button">Reset</button>
-        </div>
-      </div>
-      <div class="table-scroll pay">
-        <table>
-          <thead><tr><th>Name</th><th>Cabin / roommate</th><th class="num">Share</th><th class="num">Deposit</th><th class="num">Other paid</th><th class="num">Total paid</th><th class="num">Balance</th><th></th></tr></thead>
-          <tbody id="payBody"></tbody>
-          <tfoot><tr class="total"><td colspan="2">Group</td><td class="num" id="payShare"></td><td></td><td></td><td class="num" id="payPaid"></td><td class="num" id="payBal"></td><td></td></tr></tfoot>
-        </table>
-      </div>
-    </div>
-  </section>
 </main>
 
 <footer>
@@ -631,9 +638,10 @@ function inputs() {
   return v;
 }
 
-function costFor(room, v) {
+// fareMult: 2 for a solo cabin (single supplement ≈ paying for a second guest)
+function costFor(room, v, fareMult = 1) {
   const s = sailById(room.sail), x = EXTRAS[s.line];
-  const fare = quotes[room.id] > 0 ? quotes[room.id] : room.est;
+  const fare = (quotes[room.id] > 0 ? quotes[room.id] : room.est) * fareMult;
   const tips = (room.suite ? x.tipSuite : x.tip) * s.nights;
   const drinks = v.drinks ? x.pkgDay * s.nights : 0;
   const wifi = v.wifi ? x.wifi * s.nights : 0;
@@ -689,10 +697,9 @@ function recalc() {
   $("#totGroup").textContent = money(c.group);
   $("#totShare").textContent = money(c.share);
 
-  shareNow = c.share;
   store.set("calc", { room: room.id, inputs: Object.fromEntries(INPUTS.map(k => [k, $("#"+k).value])), drinks: v.drinks, wifi: v.wifi });
   renderCompare(v, room.id);
-  renderPayments();
+  renderPicks(v);
   renderCountdown(c.s);
 }
 
@@ -729,6 +736,45 @@ $("#cmp thead").addEventListener("click", e => {
 $("#cmp tbody").addEventListener("click", e => {
   const tr = e.target.closest("tr[data-room]"); if (!tr) return;
   selectRoom(tr.dataset.room); $("#calc").scrollIntoView();
+});
+
+// ---------- top picks ----------
+const BUNK = [
+  { label: "1 per cabin", rooms: 6, filter: r => r.beds === 0, mult: 2,
+    why: "Everybody gets his own balcony cabin. Cruise lines charge close to the price of two guests for a solo cabin, so the fare here is doubled. It's an estimate." },
+  { label: "2 per room", rooms: 3, filter: r => r.rooms === 3, mult: 1,
+    why: "Three cabins, two men each. This is the standard setup and usually the best bang for the buck." },
+  { label: "3 per room", rooms: 2, filter: r => r.rooms === 2, mult: 1,
+    why: "Two 1-bedroom suites with three men each. You get suite perks without paying for six rooms." },
+];
+function best(rooms, v, mult) {
+  return rooms.map(r => ({ r, c: costFor(r, v, mult) })).sort((a, b) => a.c.allin - b.c.allin)[0];
+}
+function renderPicks(v) {
+  $("#picksGrid").innerHTML = BUNK.map((b, i) => {
+    const { r, c } = best(ROOMS.filter(b.filter), v, b.mult);
+    const [cls, lbl] = TIMING[c.s.timing];
+    return `<article class="card pick" data-rank="${i + 1}">
+      <span class="dogtag">${b.label.toUpperCase()} · ${b.rooms} ROOMS</span>
+      <div><div class="line" style="font-family:Oswald;text-transform:uppercase;letter-spacing:.1em;font-size:12px;color:var(--muted)">${esc(c.s.line)}</div><h3>${esc(c.s.ship)}</h3></div>
+      <div class="room">${esc(r.type.replace(" (budget baseline)", ""))}</div>
+      <div class="meta">${fmtDate(c.s.depart)} → ${fmtDate(c.s.ret)} <span>·</span> ${c.s.nights} nights <span>·</span> ${esc(c.s.port)}</div>
+      <div class="pills"><span class="pill ${cls}">${lbl}</span></div>
+      <div class="big">${money(c.allin)}<small>all-in per man</small></div>
+      <div class="grp">Fare ${money(c.fare)} pp · Group of 6: <b>${money(c.allin * 6)}</b></div>
+      <div class="why">${esc(b.why)}</div>
+      ${b.mult === 1 ? `<div class="actions"><button class="btn ghost" type="button" data-pick="${r.id}">Run the numbers →</button></div>` : ""}
+    </article>`;
+  }).join("");
+  const six = best(ROOMS.filter(r => r.rooms === 1), v, 1);
+  $("#sixTogether").innerHTML = `<span class="dogtag">ALL 6 · 1 SUITE</span>
+    <div>Want everybody under one roof? The best 2-bedroom suite is <b>${esc(six.c.s.ship)} · ${esc(six.r.type)}</b> (${fmtDate(six.c.s.depart)}, ${six.c.s.nights} nts).</div>
+    <div class="amt">${money(six.c.allin)}<span style="font:12px Inter;color:var(--muted)"> per man</span></div>
+    <button class="btn ghost" type="button" data-pick="${six.r.id}">Run the numbers →</button>`;
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-pick]"); if (!b) return;
+  selectRoom(b.dataset.pick); $("#calc").scrollIntoView();
 });
 
 // ---------- countdown ----------
@@ -781,48 +827,6 @@ $("#checks").addEventListener("change", e => {
   if (e.target.checked) done[i] = true; else delete done[i];
   store.set("checks", done); renderChecks();
 });
-
-// ---------- payments ----------
-const DEFAULT_PAY = [{name:"Jerry",cabin:"",dep:250,other:0},...[2,3,4,5,6].map(n => ({name:"Brother "+n,cabin:"",dep:0,other:0}))];
-let pay = store.get("pay", null) || structuredClone(DEFAULT_PAY);
-let shareNow = 0;
-function renderPayments() {
-  const body = $("#payBody");
-  const focused = document.activeElement && body.contains(document.activeElement) ? [document.activeElement.dataset.r, document.activeElement.dataset.f] : null;
-  body.innerHTML = pay.map((p, r) => {
-    const paid = (+p.dep||0) + (+p.other||0), bal = shareNow - paid;
-    return `<tr>
-      <td><input type="text" data-r="${r}" data-f="name" value="${esc(p.name)}" aria-label="Name"></td>
-      <td><input type="text" data-r="${r}" data-f="cabin" value="${esc(p.cabin)}" aria-label="Cabin or roommate"></td>
-      <td class="num">${money(shareNow)}</td>
-      <td class="num"><input type="number" min="0" data-r="${r}" data-f="dep" value="${p.dep||""}" aria-label="Deposit paid"></td>
-      <td class="num"><input type="number" min="0" data-r="${r}" data-f="other" value="${p.other||""}" aria-label="Other payments"></td>
-      <td class="num">${money(paid)}</td>
-      <td class="num ${bal>0.5?"bal-pos":"bal-zero"}">${bal>0.5?money(bal):"Paid ✓"}</td>
-      <td><button class="btn ghost" type="button" data-del="${r}" aria-label="Remove">✕</button></td></tr>`;
-  }).join("");
-  const tPaid = pay.reduce((a, p) => a + (+p.dep||0) + (+p.other||0), 0);
-  $("#payShare").textContent = money(shareNow * pay.length);
-  $("#payPaid").textContent = money(tPaid);
-  $("#payBal").textContent = money(Math.max(0, shareNow * pay.length - tPaid));
-  if (focused) { const el = body.querySelector(`[data-r="${focused[0]}"][data-f="${focused[1]}"]`); if (el) { el.focus(); const l = el.value.length; try { el.setSelectionRange(l, l); } catch {} } }
-  renderRoster();
-}
-$("#payBody").addEventListener("input", e => {
-  const {r, f} = e.target.dataset; if (r == null) return;
-  pay[r][f] = (f === "dep" || f === "other") ? (parseFloat(e.target.value) || 0) : e.target.value;
-  store.set("pay", pay); renderPayments();
-});
-$("#payBody").addEventListener("click", e => {
-  const b = e.target.closest("[data-del]"); if (!b) return;
-  pay.splice(+b.dataset.del, 1); store.set("pay", pay); renderPayments();
-});
-$("#addRow").addEventListener("click", () => { pay.push({name:"Brother "+(pay.length+1),cabin:"",dep:0,other:0}); store.set("pay", pay); renderPayments(); });
-$("#resetPay").addEventListener("click", () => { if (confirm("Reset the payment tracker?")) { pay = structuredClone(DEFAULT_PAY); store.set("pay", pay); renderPayments(); } });
-
-function renderRoster() {
-  $("#roster").innerHTML = pay.map(p => `<span class="dogtag">${esc((p.name || "—").toUpperCase())}</span>`).join("");
-}
 
 // ---------- init ----------
 renderFilters(); renderSailings(); renderRoomSelect(); renderChecks();
