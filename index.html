@@ -372,7 +372,7 @@
         <div>
           <div class="tag">01 · Sailings</div>
           <h2>March 2027 options</h2>
-          <p>Cheapest room price we found per man, two to a room, as of Oct 26. Prices change every day, so double-check before booking.</p>
+          <p>Cheapest room price we found per man, two to a room, as of Oct 26. Prices change every day, so double-check before booking.<span id="hiddenNote"></span></p>
         </div>
       </div>
       <div class="filters" id="sailFilters" role="group" aria-label="Filter sailings"></div>
@@ -539,7 +539,9 @@
 </footer>
 
 <script>
-const SAILINGS = [
+// Hide sailings that leave within 90 days of today: too close to book well
+const BOOK_CUTOFF = new Date(); BOOK_CUTOFF.setHours(0, 0, 0, 0); BOOK_CUTOFF.setDate(BOOK_CUTOFF.getDate() + 90);
+const SAILINGS_ALL = [
   ["S1","Carnival","Carnival Conquest","Miami","2027-03-01",4,"2027-03-05","Half Moon Cay, Celebration Key",239,"Inside","clear",false,"Cheapest option. Older ship; Carnival's private Celebration Key."],
   ["S2","MSC Cruises","MSC Seaside","Miami","2027-03-01",4,"2027-03-05","Nassau, Ocean Cay",287,"Inside","clear",false,"Yacht Club (ship-within-a-ship suites) available."],
   ["S3","Royal Caribbean","Wonder of the Seas","Miami","2027-03-01",4,"2027-03-05","Nassau, Perfect Day at CocoCay",null,null,"clear",false,"One of the biggest ships afloat. Has 2-bedroom Royal Loft & AquaTheater suites."],
@@ -558,6 +560,7 @@ const SAILINGS = [
   ["S16","Virgin Voyages","Scarlet Lady","Miami","2027-03-25",4,"2027-03-29","Key West, Bimini Beach Club",623,"Lowest cabin","easter",true,"Easter is Sun Mar 28, 2027."],
   ["S17","Royal Caribbean","Utopia of the Seas","Port Canaveral","2027-03-26",3,"2027-03-29","Perfect Day at CocoCay",605,"Inside","easter",false,""],
 ].map(r => ({id:r[0], line:r[1], ship:r[2], port:r[3], depart:r[4], nights:r[5], ret:r[6], ports:r[7], fare:r[8], cabin:r[9], timing:r[10], adults:r[11], note:r[12]}));
+const SAILINGS = SAILINGS_ALL.filter(s => new Date(s.depart + "T00:00") >= BOOK_CUTOFF);
 
 const TIMING = {
   clear:  ["clear",  "Before spring break"],
@@ -584,7 +587,8 @@ const ROOMS = [
   ["R15","S10","Grand Suite – 1 Bedroom",1,"4",2,1600,true,""],
   ["R16","S10","Royal Loft Suite – 2 Bedroom",2,"6",1,3500,true,"Confirm availability on Utopia when quoting."],
   ["R17","S9","Haven 2-Bedroom Family Villa",2,"6",1,1500,true,"3-night version of R11 on Mar 5."],
-].map(r => ({id:r[0], sail:r[1], type:r[2], beds:r[3], sleeps:r[4], rooms:r[5], est:r[6], suite:r[7], note:r[8]}));
+].map(r => ({id:r[0], sail:r[1], type:r[2], beds:r[3], sleeps:r[4], rooms:r[5], est:r[6], suite:r[7], note:r[8]}))
+  .filter(r => SAILINGS.some(s => s.id === r.sail));
 
 // pkgDay already includes the service charge
 const EXTRAS = {
@@ -724,7 +728,15 @@ function selectRoom(id) {
 
 function recalc() {
   const v = inputs();
+  renderPicks(v);
+  renderPorts(v);
+  renderWhen(v);
   const room = ROOMS.find(r => r.id === $("#roomSel").value);
+  if (!room) {
+    $("#calc .calc").innerHTML = SAILINGS.length ? NO_ROOMS : NONE_LEFT; $("#cmp tbody").innerHTML = "";
+    $("#countdown").innerHTML = ""; $("#countdownCap").textContent = "";
+    return;
+  }
   const c = costFor(room, v);
   $("#roomSum").innerHTML = `<span><b>${esc(c.s.line)}</b> · ${esc(c.s.ship)}</span><span>${esc(c.s.port)} · ${fmtDate(c.s.depart)}</span><span><b>${c.s.nights}</b> nights</span><span><b>${room.rooms}</b> room${room.rooms>1?"s":""} for 6</span><span>Sleeps ${room.sleeps}</span><span>Room about ${money(room.est)} each</span>`;
   const note = [room.note, c.x.rule].filter(Boolean).join(" ");
@@ -752,9 +764,6 @@ function recalc() {
 
   store.set("calc", { room: room.id, inputs: Object.fromEntries(INPUTS.map(k => [k, $("#"+k).value])), drinks: v.drinks, wifi: v.wifi, travel: v.travel });
   renderCompare(v, room.id);
-  renderPicks(v);
-  renderPorts(v);
-  renderWhen(v);
   document.querySelectorAll("[data-fly]").forEach(el => el.hidden = v.travel !== "fly");
   document.querySelectorAll("[data-drive]").forEach(el => el.hidden = v.travel === "fly");
   const hp = home?.ports?.[room ? sailById(room.sail).port : ""];
@@ -836,10 +845,12 @@ function workdaysOff(s) {
 }
 function renderWhen(v) {
   const rows = WINDOWS.map(w => {
-    const sails = w.sails.map(sailById);
+    const sails = w.sails.map(sailById).filter(Boolean);
+    if (!sails.some(s => s.fare)) return null;
     const cheap = best(sails.filter(s => s.fare).map(s => ({ id: s.id, sail: s.id, type: cabinLabel(s.cabin), beds: 0, rooms: 3, est: s.fare, suite: false })), v, 1);
     return { w, sails, cheap, off: [...new Set(sails.map(workdaysOff))].sort((a, b) => a - b).filter((x, i, a) => i === 0 || i === a.length - 1).join("–"), nights: [...new Set(sails.map(s => s.nights))].sort().join("–") };
-  });
+  }).filter(Boolean);
+  if (!rows.length) { $("#whenGrid").innerHTML = NONE_LEFT; return; }
   const win = rows.filter(r => !r.w.skip).sort((a, b) => a.cheap.c.allin - b.cheap.c.allin)[0];
   $("#whenGrid").innerHTML = rows.map(r => {
     const c = r.cheap.c, isWin = r === win;
@@ -864,14 +875,19 @@ $("#bookTime").innerHTML = [
   ["Before you sail", "Buy the drink package and Wi-Fi online before the cruise. They often go 20–40% off, and it's cheaper than buying on the ship."],
 ].map(([t, d]) => `<div class="card"><b>${t}</b>${d}</div>`).join("");
 
+const NONE_LEFT = `<div class="card" style="color:var(--muted)">Every sailing on this list now leaves within 90 days, so it's too late to book these. Time to find new dates.</div>`;
+const NO_ROOMS = `<div class="card" style="color:var(--muted)">None of the room options leave more than 90 days out anymore, so it's too late to book them.</div>`;
 function renderPicks(v) {
+  if (!SAILINGS.length) { $("#cheapest").innerHTML = NONE_LEFT; $("#picksGrid").innerHTML = ""; $("#sixTogether").hidden = true; return; }
   const cheap = best(SAILINGS.filter(s => s.fare).map(s => ({ id: s.id, sail: s.id, type: cabinLabel(s.cabin), beds: 0, rooms: 3, est: s.fare, suite: false })), v, 1);
   const cs = cheap.c.s;
   $("#cheapest").innerHTML = `<span class="dogtag">CHEAPEST WAY TO GO</span>
     <div><b>${esc(cs.ship)}</b> · ${esc(cs.line)}<br><span style="color:var(--muted)">${fmtDate(cs.depart)} → ${fmtDate(cs.ret)} · ${cs.nights} nights · ${esc(cs.port)} · ${esc(cabinLabel(cs.cabin))}, 2 guys each</span></div>
     <div class="amt">${money(cheap.c.allin)}<span style="font:12px Inter;color:var(--muted)"> per man, everything in</span></div>`;
   $("#picksGrid").innerHTML = BUNK.map((b, i) => {
-    const { r, c } = best(ROOMS.filter(b.filter), v, b.mult);
+    const pick = best(ROOMS.filter(b.filter), v, b.mult);
+    if (!pick) return "";
+    const { r, c } = pick;
     const [cls, lbl] = TIMING[c.s.timing];
     return `<article class="card pick" data-rank="${i + 1}">
       <span class="dogtag">${b.label.toUpperCase()} · ${b.rooms} ROOMS</span>
@@ -884,8 +900,9 @@ function renderPicks(v) {
       <div class="why">${esc(b.why)}</div>
       ${b.mult === 1 ? `<div class="actions"><button class="btn ghost" type="button" data-pick="${r.id}">Run the numbers →</button></div>` : ""}
     </article>`;
-  }).join("");
+  }).join("") || NO_ROOMS;
   const six = best(ROOMS.filter(r => r.rooms === 1), v, 1);
+  $("#sixTogether").hidden = !six; if (!six) return;
   $("#sixTogether").innerHTML = `<span class="dogtag">ALL 6 · 1 SUITE</span>
     <div>Want everybody under one roof? The best 2-bedroom suite is <b>${esc(six.c.s.ship)} · ${esc(six.r.type)}</b> (${fmtDate(six.c.s.depart)}, ${six.c.s.nights} nights).</div>
     <div class="amt">${money(six.c.allin)}<span style="font:12px Inter;color:var(--muted)"> per man</span></div>
@@ -1019,7 +1036,10 @@ if (state) {
   if (state.travel) $("#travel").value = state.travel;
 }
 if (home) { $("#homeIn").value = home.name; $("#homeMsg").textContent = `Showing drives from ${home.name}.`; }
-$("#roomSel").value = state?.room || "R2";
+const startRoom = [state?.room, "R2", ROOMS[0]?.id].find(id => ROOMS.some(r => r.id === id));
+if (startRoom) $("#roomSel").value = startRoom;
+const hidden = SAILINGS_ALL.length - SAILINGS.length;
+if (hidden) $("#hiddenNote").textContent = ` ${hidden} sailing${hidden > 1 ? "s" : ""} leaving within 90 days ${hidden > 1 ? "are" : "is"} hidden because it's too late to book well.`;
 $("#quote").value = quotes[$("#roomSel").value] || "";
 recalc();
 </script>
