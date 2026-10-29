@@ -1,0 +1,838 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cruise 4 the Fellas</title>
+<meta name="description" content="March 2027 guys' cruise planner: sailings, suites, all-in cost calculator, military deals, checklist and payment tracker.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0a1622;
+    --navy-2: #102233;
+    --navy-3: #18324a;
+    --line: #26425e;
+    --sand: #e8d9b5;
+    --sand-dim: #b9ab88;
+    --olive: #6b7a3c;
+    --olive-2: #8a9a52;
+    --sunset: #f08a3c;
+    --sea: #3fb6c4;
+    --red: #e05a4f;
+    --text: #e9eef3;
+    --muted: #93a6b8;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--navy);
+    color: var(--text);
+    font: 15px/1.55 Inter, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--sea); }
+  h1, h2, h3 { font-family: Oswald, sans-serif; letter-spacing: .02em; margin: 0; }
+  .stencil { font-family: "Black Ops One", Oswald, sans-serif; letter-spacing: .04em; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 16px; }
+
+  /* Nav */
+  nav.top {
+    position: sticky; top: 0; z-index: 20;
+    background: rgba(10, 22, 34, .92);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+  }
+  nav.top .wrap { display: flex; align-items: center; gap: 18px; height: 56px; }
+  nav.top .brand { font-family: "Black Ops One"; color: var(--sand); text-decoration: none; font-size: 18px; white-space: nowrap; }
+  nav.top .links { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+  nav.top .links::-webkit-scrollbar { display: none; }
+  nav.top .links a {
+    color: var(--muted); text-decoration: none; font-family: Oswald; text-transform: uppercase;
+    font-size: 13px; letter-spacing: .08em; padding: 6px 10px; border-radius: 8px; white-space: nowrap;
+  }
+  nav.top .links a:hover { color: var(--sand); background: var(--navy-3); }
+
+  /* Hero */
+  header.hero {
+    position: relative; overflow: hidden;
+    background:
+      radial-gradient(1200px 500px at 80% -10%, rgba(240, 138, 60, .45), transparent 60%),
+      radial-gradient(900px 400px at 10% 0%, rgba(63, 182, 196, .25), transparent 60%),
+      linear-gradient(180deg, #13304a 0%, var(--navy) 100%);
+    padding: 64px 0 120px;
+  }
+  .hero .sun {
+    position: absolute; right: 12%; top: 70px; width: 170px; height: 170px; border-radius: 50%;
+    background: radial-gradient(circle, #ffc178 0%, #f08a3c 55%, rgba(240,138,60,0) 72%);
+    opacity: .85;
+  }
+  .hero .waves { position: absolute; left: 0; right: 0; bottom: -1px; width: 100%; height: 110px; }
+  .hero .eyebrow {
+    display: inline-flex; gap: 8px; align-items: center;
+    font-family: Oswald; text-transform: uppercase; letter-spacing: .2em; font-size: 12px;
+    color: var(--sand); border: 1px solid rgba(232,217,181,.35); padding: 5px 12px; border-radius: 999px;
+  }
+  .hero h1 { font-family: "Black Ops One"; font-size: clamp(40px, 8vw, 84px); line-height: 1; margin: 18px 0 10px; color: #fff; text-shadow: 0 4px 30px rgba(0,0,0,.4); }
+  .hero h1 span { color: var(--sunset); }
+  .hero p.lead { max-width: 620px; color: #cfdbe6; font-size: 17px; margin: 0 0 28px; }
+  .countdown { display: flex; gap: 10px; flex-wrap: wrap; }
+  .countdown .unit {
+    background: rgba(10,22,34,.6); border: 1px solid var(--line); border-radius: 12px;
+    padding: 10px 14px; min-width: 78px; text-align: center;
+  }
+  .countdown .num { font-family: "Black Ops One"; font-size: 30px; color: var(--sand); line-height: 1.1; }
+  .countdown .lbl { font-family: Oswald; font-size: 11px; letter-spacing: .15em; text-transform: uppercase; color: var(--muted); }
+  .countdown-cap { margin-top: 10px; color: var(--muted); font-size: 13px; }
+
+  /* Sections */
+  section { padding: 56px 0; border-top: 1px solid rgba(38,66,94,.5); }
+  .sec-head { display: flex; align-items: end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 22px; }
+  .sec-head .tag { font-family: Oswald; color: var(--sunset); font-size: 12px; letter-spacing: .25em; text-transform: uppercase; }
+  .sec-head h2 { font-size: clamp(26px, 4vw, 36px); text-transform: uppercase; color: var(--sand); }
+  .sec-head p { margin: 6px 0 0; color: var(--muted); max-width: 640px; }
+
+  .card {
+    background: var(--navy-2); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 18px;
+  }
+
+  /* Dedication */
+  .dedication { display: grid; grid-template-columns: auto 1fr; gap: 22px; align-items: center; }
+  .dedication .badge {
+    width: 92px; height: 92px; border-radius: 50%; display: grid; place-items: center;
+    background: radial-gradient(circle at 30% 30%, var(--olive-2), var(--olive));
+    border: 3px solid var(--sand); color: var(--navy); font-family: "Black Ops One"; font-size: 24px;
+    box-shadow: 0 0 0 6px rgba(107,122,60,.25);
+  }
+  .dedication h3 { font-size: 22px; color: var(--sand); text-transform: uppercase; }
+  .dedication p { margin: 6px 0 0; color: #cfdbe6; }
+  .roster { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .dogtag {
+    font-family: "Black Ops One"; font-size: 13px; letter-spacing: .06em;
+    background: linear-gradient(180deg, #c9ccd1, #8e939a); color: #1b2128;
+    padding: 6px 14px 6px 22px; border-radius: 10px 18px 18px 10px; position: relative;
+  }
+  .dogtag::before { content: ""; position: absolute; left: 8px; top: 50%; width: 6px; height: 6px; margin-top: -3px; border-radius: 50%; background: var(--navy); }
+
+  /* Filters */
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+  .chip {
+    border: 1px solid var(--line); background: var(--navy-2); color: var(--muted);
+    font: 500 13px Inter; padding: 7px 12px; border-radius: 999px; cursor: pointer;
+  }
+  .chip[aria-pressed="true"] { background: var(--sand); color: var(--navy); border-color: var(--sand); }
+
+  /* Sailings */
+  .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+  .sail { display: flex; flex-direction: column; gap: 10px; position: relative; }
+  .sail .top { display: flex; justify-content: space-between; gap: 8px; align-items: start; }
+  .sail .line { font-family: Oswald; text-transform: uppercase; letter-spacing: .1em; font-size: 12px; color: var(--muted); }
+  .sail h3 { font-size: 22px; color: #fff; }
+  .sail .id { font-family: "Black Ops One"; color: var(--sand-dim); font-size: 13px; }
+  .sail .dates { font-family: Oswald; font-size: 16px; color: var(--sand); }
+  .sail .ports { color: #cfdbe6; font-size: 14px; }
+  .sail .note { color: var(--muted); font-size: 13px; }
+  .sail .foot { margin-top: auto; display: flex; justify-content: space-between; align-items: end; gap: 8px; padding-top: 10px; border-top: 1px dashed var(--line); }
+  .price { font-family: "Black Ops One"; font-size: 26px; color: var(--sunset); line-height: 1; }
+  .price small { display: block; font-family: Inter; font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .pill { font: 600 11px Inter; padding: 4px 8px; border-radius: 999px; white-space: nowrap; }
+  .pill.clear { background: rgba(138,154,82,.2); color: #b9cc78; border: 1px solid rgba(138,154,82,.5); }
+  .pill.edge { background: rgba(240,138,60,.15); color: #f6ad6f; border: 1px solid rgba(240,138,60,.45); }
+  .pill.peak, .pill.easter { background: rgba(224,90,79,.15); color: #f08a80; border: 1px solid rgba(224,90,79,.45); }
+  .pill.adult { background: rgba(63,182,196,.15); color: #7fd5df; border: 1px solid rgba(63,182,196,.45); }
+  .pills { display: flex; flex-wrap: wrap; gap: 6px; }
+  .callout { margin-top: 18px; display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+  .callout .card { font-size: 14px; color: #cfdbe6; }
+  .callout b { color: var(--sand); }
+
+  /* Calculator */
+  .calc { display: grid; grid-template-columns: 1.1fr 1fr; gap: 16px; }
+  label.field { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+  select, input[type=number], input[type=text] {
+    width: 100%; background: var(--navy); color: var(--text); border: 1px solid var(--line);
+    border-radius: 10px; padding: 9px 10px; font: 14px Inter;
+  }
+  select:focus, input:focus { outline: 2px solid var(--sea); outline-offset: 1px; }
+  .fields { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .toggle { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--text); cursor: pointer; }
+  .toggle input { width: 18px; height: 18px; accent-color: var(--sunset); }
+  .room-sum { display: flex; flex-wrap: wrap; gap: 6px 14px; color: var(--muted); font-size: 13px; margin: 10px 0 14px; }
+  .room-sum b { color: var(--sand); font-weight: 600; }
+  .room-note { font-size: 13px; color: #cfdbe6; background: var(--navy); border-left: 3px solid var(--sunset); padding: 8px 10px; border-radius: 6px; margin-bottom: 14px; }
+  .sub { font-family: Oswald; text-transform: uppercase; letter-spacing: .14em; font-size: 12px; color: var(--sunset); margin: 16px 0 8px; }
+  .total-box { text-align: center; padding: 22px 16px; background: linear-gradient(160deg, var(--navy-3), var(--navy-2)); }
+  .total-box .k { font-family: Oswald; text-transform: uppercase; letter-spacing: .2em; font-size: 12px; color: var(--muted); }
+  .total-box .big { font-family: "Black Ops One"; font-size: clamp(44px, 7vw, 64px); color: var(--sunset); line-height: 1.05; }
+  .total-box .row { display: flex; justify-content: center; gap: 22px; flex-wrap: wrap; margin-top: 8px; color: #cfdbe6; }
+  .total-box .row b { color: var(--sand); font-family: Oswald; font-size: 20px; display: block; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-family: Oswald; text-transform: uppercase; letter-spacing: .08em; font-size: 12px; color: var(--muted); font-weight: 500; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  tr.total td { font-weight: 700; color: var(--sand); border-bottom: none; font-size: 15px; }
+  .breakdown td:first-child { color: #cfdbe6; }
+  .bar { height: 8px; border-radius: 6px; background: var(--navy); overflow: hidden; margin-top: 4px; }
+  .bar > i { display: block; height: 100%; background: linear-gradient(90deg, var(--sea), var(--sunset)); }
+
+  /* Compare */
+  .table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--navy-2); }
+  .table-scroll table { min-width: 860px; }
+  .table-scroll th { position: sticky; top: 0; background: var(--navy-2); cursor: pointer; user-select: none; }
+  .table-scroll th[aria-sort]::after { content: " ▾"; color: var(--sunset); }
+  .table-scroll th[aria-sort="ascending"]::after { content: " ▴"; }
+  .table-scroll tbody tr:hover { background: var(--navy-3); }
+  .table-scroll tbody tr.sel { background: rgba(240,138,60,.12); }
+  .rid { font-family: "Black Ops One"; color: var(--sand-dim); }
+  .allin { font-weight: 700; color: var(--sunset); }
+  button.btn {
+    background: var(--sunset); color: #1b1006; border: 0; border-radius: 10px; padding: 9px 14px;
+    font: 600 13px Inter; cursor: pointer;
+  }
+  button.btn.ghost { background: transparent; color: var(--sand); border: 1px solid var(--line); }
+  button.btn:hover { filter: brightness(1.08); }
+
+  /* Intel / Movement */
+  .intel { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+  .intel h3 { color: #fff; font-size: 20px; margin-bottom: 8px; }
+  .intel dl { margin: 0; display: grid; gap: 8px; }
+  .intel dt { font-family: Oswald; text-transform: uppercase; letter-spacing: .12em; font-size: 11px; color: var(--sunset); }
+  .intel dd { margin: 0; color: #cfdbe6; font-size: 14px; }
+  .port h3 { color: #fff; font-size: 19px; }
+  .port .stat { display: flex; gap: 18px; margin: 10px 0; }
+  .port .stat div { font-family: "Black Ops One"; color: var(--sand); font-size: 22px; line-height: 1; }
+  .port .stat span { display: block; font-family: Inter; font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .port p { margin: 4px 0; font-size: 14px; color: #cfdbe6; }
+
+  /* Checklist */
+  .checklist { display: grid; gap: 8px; }
+  .check {
+    display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: start;
+    background: var(--navy-2); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px;
+  }
+  .check input { width: 20px; height: 20px; accent-color: var(--olive-2); margin-top: 2px; }
+  .check .t { font-weight: 600; }
+  .check .n { color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .check .due { font-family: Oswald; font-size: 14px; text-align: right; white-space: nowrap; color: var(--sand); }
+  .check .due small { display: block; font-family: Inter; font-size: 11px; color: var(--muted); }
+  .check.done { opacity: .55; }
+  .check.done .t { text-decoration: line-through; }
+  .check.overdue .due { color: var(--red); }
+  .check.soon .due { color: var(--sunset); }
+
+  /* Payments */
+  .pay input[type=text], .pay input[type=number] { padding: 7px 8px; min-width: 90px; }
+  .pay td { vertical-align: middle; }
+  .bal-pos { color: var(--sunset); font-weight: 600; }
+  .bal-zero { color: var(--olive-2); font-weight: 600; }
+  .fine { color: var(--muted); font-size: 12px; margin-top: 10px; }
+
+  footer { padding: 40px 0 60px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); }
+  footer .motto { font-family: "Black Ops One"; color: var(--sand); font-size: 20px; margin-bottom: 8px; }
+
+  @media (max-width: 860px) {
+    .calc { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 560px) {
+    header.hero { padding: 40px 0 100px; }
+    .hero .sun { width: 110px; height: 110px; right: 6%; top: 30px; }
+    .dedication { grid-template-columns: 1fr; gap: 14px; }
+    .dedication .badge { width: 56px; height: 56px; font-size: 18px; }
+    .fields { grid-template-columns: 1fr 1fr; }
+    .countdown .unit { min-width: 64px; padding: 8px 10px; }
+    .countdown .num { font-size: 24px; }
+    .check { grid-template-columns: auto 1fr; }
+    .check .due { grid-column: 2; text-align: left; }
+    .check .due small { display: inline; margin-left: 6px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="top">
+  <div class="wrap">
+    <a class="brand" href="#top">C4TF</a>
+    <div class="links">
+      <a href="#sailings">Sailings</a>
+      <a href="#calc">Calculator</a>
+      <a href="#compare">Compare</a>
+      <a href="#intel">Deals</a>
+      <a href="#movement">Getting There</a>
+      <a href="#checklist">Checklist</a>
+      <a href="#payments">Payments</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="sun" aria-hidden="true"></div>
+  <div class="wrap" style="position:relative">
+    <span class="eyebrow">★ Operation Shore Leave · March 2027</span>
+    <h1>Cruise 4 the <span>Fellas</span></h1>
+    <p class="lead">Six brothers, one ship, 3 to 4 nights out of Florida. We've shared tents, convoys and bad chow. This time it's the Bahamas, a balcony and a cold one.</p>
+    <div class="countdown" id="countdown" aria-live="polite"></div>
+    <div class="countdown-cap" id="countdownCap"></div>
+  </div>
+  <svg class="waves" viewBox="0 0 1440 110" preserveAspectRatio="none" aria-hidden="true">
+    <path fill="#13304a" fill-opacity=".6" d="M0,60 C240,100 480,20 720,50 C960,80 1200,30 1440,60 L1440,110 L0,110 Z"/>
+    <path fill="#0a1622" d="M0,80 C200,50 420,105 720,80 C1000,55 1220,100 1440,78 L1440,110 L0,110 Z"/>
+  </svg>
+</header>
+
+<main>
+  <section style="border-top:0; padding-top:24px">
+    <div class="wrap">
+      <div class="card dedication">
+        <div class="badge" aria-hidden="true">★</div>
+        <div>
+          <h3>Brothers in arms. Brothers at sea.</h3>
+          <p>We deployed together to Afghanistan and Iraq on our first one, and the history goes back a long way. This trip is for the guys who were there. Book it before someone gets voluntold for another deployment.</p>
+          <div class="roster" id="roster"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="sailings">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <div class="tag">01 · Sailings</div>
+          <h2>March 2027 options</h2>
+          <p>Lowest "from" fares per person (usually inside cabin, two to a room), found Oct 26, 2026. Prices change daily, so verify before booking.</p>
+        </div>
+      </div>
+      <div class="filters" id="sailFilters" role="group" aria-label="Filter sailings"></div>
+      <div class="grid" id="sailGrid"></div>
+      <div class="callout">
+        <div class="card"><b>Spring break:</b> Most college breaks run roughly Mar 6–21, 2027. Easter is Sun Mar 28, and K-12 breaks cluster the week before. The cleanest window is sailings that depart Mar 1–4.</div>
+        <div class="card"><b>Gulf option:</b> New Orleans (~6 hr) and Mobile (~5.5 hr) also run 4-night cruises to Cozumel/Progreso if the group wants a shorter drive.</div>
+        <div class="card"><b>No fare listed?</b> No March 2027 price was published on the sites checked. Get a quote.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="calc">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <div class="tag">02 · Calculator</div>
+          <h2>All-in cost per man</h2>
+          <p>Pick a room setup and set your inputs. Fare, tips, drinks, Wi-Fi, gas, parking, hotel and insurance all roll up into one number.</p>
+        </div>
+      </div>
+      <div class="calc">
+        <div class="card">
+          <label class="field">Room setup
+            <select id="roomSel"></select>
+          </label>
+          <div class="room-sum" id="roomSum"></div>
+          <div class="room-note" id="roomNote" hidden></div>
+          <label class="field" style="margin-bottom:12px">Your quote per person (optional, overrides the estimate)
+            <input type="number" id="quote" min="0" step="1" placeholder="Leave blank to use the estimate">
+          </label>
+          <div style="display:flex; gap:18px; flex-wrap:wrap">
+            <label class="toggle"><input type="checkbox" id="drinks" checked> Drink package</label>
+            <label class="toggle"><input type="checkbox" id="wifi" checked> Wi-Fi</label>
+          </div>
+
+          <div class="sub">Trip inputs (per person)</div>
+          <div class="fields">
+            <label class="field">Group size <input type="number" id="group" min="1" value="6"></label>
+            <label class="field">Excursions / cabana $ <input type="number" id="excursions" min="0" value="150"></label>
+            <label class="field">Hotel night before $ <input type="number" id="hotel" min="0" value="60"></label>
+            <label class="field">Travel insurance $ <input type="number" id="insurance" min="0" value="60"></label>
+            <label class="field">Spending money $ <input type="number" id="spending" min="0" value="150"></label>
+          </div>
+
+          <div class="sub">Driving (Jackson, TN → port)</div>
+          <div class="fields">
+            <label class="field">One-way miles <input type="number" id="miles" min="0" value="950"></label>
+            <label class="field">MPG <input type="number" id="mpg" min="1" value="25"></label>
+            <label class="field">Gas $/gal <input type="number" id="gas" min="0" step="0.01" value="3.10"></label>
+            <label class="field">Cars <input type="number" id="cars" min="0" value="2"></label>
+            <label class="field">Parking $/day per car <input type="number" id="parking" min="0" value="25"></label>
+          </div>
+        </div>
+
+        <div style="display:grid; gap:16px; align-content:start">
+          <div class="card total-box">
+            <div class="k">All-in per person</div>
+            <div class="big" id="totPP">$0</div>
+            <div class="row">
+              <div><b id="totNight">$0</b>per night</div>
+              <div><b id="totGroup">$0</b>whole group</div>
+              <div><b id="totShare">$0</b>cruise share*</div>
+            </div>
+          </div>
+          <div class="card">
+            <table class="breakdown">
+              <thead><tr><th>Cost item</th><th class="num">Per person</th><th class="num">Group</th></tr></thead>
+              <tbody id="breakdown"></tbody>
+            </table>
+            <div class="fine">*Cruise share = fare + tips + drinks + Wi-Fi. It's what the Payment Tracker uses.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="compare">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <div class="tag">03 · Compare</div>
+          <h2>Every room, side by side</h2>
+          <p>Uses your calculator inputs and toggles. Click a column header to sort, or click a row to load it into the calculator.</p>
+        </div>
+      </div>
+      <div class="table-scroll">
+        <table id="cmp">
+          <thead><tr>
+            <th data-k="id">Room</th><th data-k="line">Line / Ship</th><th data-k="depart">Depart</th><th data-k="nights" class="num">Nts</th>
+            <th data-k="type">Room type</th><th data-k="rooms" class="num">Rooms</th><th data-k="fare" class="num">Fare</th><th data-k="tips" class="num">Tips</th>
+            <th data-k="drinks" class="num">Drinks</th><th data-k="wifi" class="num">Wi-Fi</th><th data-k="other" class="num">Other</th>
+            <th data-k="allin" class="num" aria-sort="ascending">All-in pp</th><th data-k="group" class="num">Group</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="callout">
+        <div class="card"><b>How to read it:</b> Estimates assume full rooms (2 per balcony, 3 per 1-bedroom suite, 6 per 2-bedroom suite). The 3rd through 6th guests in a suite often pay less, so ask for the <b>total</b> suite price and divide by 6.</div>
+        <div class="card"><b>Carnival &amp; MSC</b> don't offer true 2-bedroom suites on these ships. Ask about connecting cabins or suites instead.</div>
+        <div class="card"><b>Other extras:</b> shore excursions ($50–$150 each), specialty dining ($40–$75 pp per meal), casino, photos, and private-island cabanas ($300–$1,000+ split).</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="intel">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <div class="tag">04 · Intel</div>
+          <h2>Military discounts &amp; deals</h2>
+          <p>Ask for the military rate and the current promo together, because many lines let them stack. Bring your DD-214 (veterans) or military ID.</p>
+        </div>
+      </div>
+      <div class="intel" id="intelGrid"></div>
+      <div class="callout">
+        <div class="card"><b>All lines:</b> Wave Season (Jan–Mar) and Black Friday/Cyber Monday are the biggest sale windows. Book a refundable fare now and re-price if it drops. A travel agent can link all 3 cabins as a group and often adds onboard credit.</div>
+        <div class="card"><b>Extras by line:</b> <span id="extrasNote"></span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="movement">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <div class="tag">05 · Movement</div>
+          <h2>Getting from Jackson, TN to the port</h2>
+          <p>Plan to arrive the day <b>before</b> sailing. Miss the ship because of traffic or a delayed flight and there's no refund. MEM is ~85 mi from Jackson and BNA is ~130 mi.</p>
+        </div>
+      </div>
+      <div class="grid" id="portGrid"></div>
+    </div>
+  </section>
+
+  <section id="checklist">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <div class="tag">06 · Mission checklist</div>
+          <h2>Booking checklist &amp; key dates</h2>
+          <p>Dates are based on the Mon 3/1/27 sailing. Check items off as you go; they're saved on this device.</p>
+        </div>
+      </div>
+      <div class="checklist" id="checks"></div>
+    </div>
+  </section>
+
+  <section id="payments">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <div class="tag">07 · Payments</div>
+          <h2>Who's paid what</h2>
+          <p>Each man's share comes from the calculator's cruise share for the room you picked. Enter names and payments below. They're saved in this browser only.</p>
+        </div>
+        <div style="display:flex; gap:8px">
+          <button class="btn ghost" id="addRow" type="button">+ Add a man</button>
+          <button class="btn ghost" id="resetPay" type="button">Reset</button>
+        </div>
+      </div>
+      <div class="table-scroll pay">
+        <table>
+          <thead><tr><th>Name</th><th>Cabin / roommate</th><th class="num">Share</th><th class="num">Deposit</th><th class="num">Other paid</th><th class="num">Total paid</th><th class="num">Balance</th><th></th></tr></thead>
+          <tbody id="payBody"></tbody>
+          <tfoot><tr class="total"><td colspan="2">Group</td><td class="num" id="payShare"></td><td></td><td></td><td class="num" id="payPaid"></td><td class="num" id="payBal"></td><td></td></tr></tfoot>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="motto">Leave no man ashore.</div>
+    <p>Fares and deals come from public listings checked Oct 26, 2026 (Taoticket, Cruise Timetables, CruiseHive, Cruise Critic, the Royal Caribbean Blog and CruiseShipTracking). Estimates only. Confirm everything with the cruise line or your agent before you pay.</p>
+  </div>
+</footer>
+
+<script>
+const SAILINGS = [
+  ["S1","Carnival","Carnival Conquest","Miami","2027-03-01",4,"2027-03-05","Half Moon Cay, Celebration Key",239,"Inside","clear",false,"Cheapest option. Older ship; Carnival's private Celebration Key."],
+  ["S2","MSC Cruises","MSC Seaside","Miami","2027-03-01",4,"2027-03-05","Nassau, Ocean Cay",287,"Inside","clear",false,"Yacht Club (ship-within-a-ship suites) available."],
+  ["S3","Royal Caribbean","Wonder of the Seas","Miami","2027-03-01",4,"2027-03-05","Nassau, Perfect Day at CocoCay",null,null,"clear",false,"One of the biggest ships afloat. Has 2-bedroom Royal Loft & AquaTheater suites."],
+  ["S4","Norwegian (NCL)","Norwegian Joy","Miami","2027-03-01",4,"2027-03-05","Great Stirrup Cay",null,null,"clear",false,"Has Haven 2-Bedroom Family Villa (sleeps 6, all of you in one suite)."],
+  ["S5","Carnival","Carnival Glory","Port Canaveral","2027-03-01",4,"2027-03-05","Nassau, Celebration Key",321,"Inside","clear",false,"Closest FL port to Jackson by car (~12 hr)."],
+  ["S6","Virgin Voyages","Brilliant Lady","Miami","2027-03-04",4,"2027-03-08","Key West, Bimini Beach Club",709,"Lowest cabin","clear",true,"Adults-only. Fare includes basic drinks (soda, coffee), Wi-Fi & all restaurants."],
+  ["S7","MSC Cruises","MSC Seashore","Port Canaveral","2027-03-04",3,"2027-03-07","Nassau, Ocean Cay",339,"Inside","clear",false,"Newer ship; Yacht Club available."],
+  ["S8","Carnival","Carnival Freedom","Port Canaveral","2027-03-04",4,"2027-03-08","Half Moon Cay, Celebration Key",355,"Inside","clear",false,""],
+  ["S9","Norwegian (NCL)","Norwegian Joy","Miami","2027-03-05",3,"2027-03-08","Nassau, Great Stirrup Cay",298,"Inside","edge",false,"Haven 2-Bedroom Family Villa (sleeps 6)."],
+  ["S10","Royal Caribbean","Utopia of the Seas","Port Canaveral","2027-03-05",3,"2027-03-08","Nassau, Perfect Day at CocoCay",588,"Inside","edge",false,"Newest RCI ship on short cruises, built for party-weekend trips."],
+  ["S11","MSC Cruises","MSC Seaside","Miami","2027-03-05",3,"2027-03-08","Nassau, Ocean Cay",247,"Inside","edge",false,""],
+  ["S12","Carnival","Carnival Conquest","Miami","2027-03-05",3,"2027-03-08","Celebration Key",254,"Inside","edge",false,""],
+  ["S13","Norwegian (NCL)","Norwegian Getaway","Port Canaveral","2027-03-08",4,"2027-03-12","Great Stirrup Cay, Nassau",300,"Inside","peak",false,"Has Haven 3-Bedroom Garden Villa."],
+  ["S14","Virgin Voyages","Scarlet Lady","Miami","2027-03-11",4,"2027-03-15","Key West, Bimini Beach Club",665,"Lowest cabin","peak",true,"Adults-only cuts down the spring-break crowd."],
+  ["S15","Royal Caribbean","Utopia of the Seas","Port Canaveral","2027-03-12",3,"2027-03-15","Nassau, Perfect Day at CocoCay",739,"Balcony","peak",false,""],
+  ["S16","Virgin Voyages","Scarlet Lady","Miami","2027-03-25",4,"2027-03-29","Key West, Bimini Beach Club",623,"Lowest cabin","easter",true,"Easter is Sun Mar 28, 2027."],
+  ["S17","Royal Caribbean","Utopia of the Seas","Port Canaveral","2027-03-26",3,"2027-03-29","Perfect Day at CocoCay",605,"Inside","easter",false,""],
+].map(r => ({id:r[0], line:r[1], ship:r[2], port:r[3], depart:r[4], nights:r[5], ret:r[6], ports:r[7], fare:r[8], cabin:r[9], timing:r[10], adults:r[11], note:r[12]}));
+
+const TIMING = {
+  clear:  ["clear",  "Before spring break"],
+  edge:   ["edge",   "Edge: returns as breaks start"],
+  peak:   ["peak",   "Peak college spring break"],
+  easter: ["easter", "Easter / K-12 break week"],
+};
+
+const ROOMS = [
+  ["R1","S1","Balcony cabin (budget baseline)",0,"2–4",3,450,false,"2 per cabin. Cheapest real comfort."],
+  ["R2","S1","Grand Suite",1,"2–4",3,1100,true,"Carnival's top suite on Conquest; priority boarding (Faster to the Fun). No 2-bedroom suites on this ship."],
+  ["R3","S2","Balcony cabin (budget baseline)",0,"2–4",3,400,false,""],
+  ["R4","S2","Yacht Club Deluxe Suite",1,"2–4",3,1260,true,"Yacht Club: private pool, lounge and restaurant, plus a butler. Yacht Club fares normally INCLUDE a drink package, so confirm when quoting. No true 2-bedroom suite."],
+  ["R5","S3","Balcony cabin (budget baseline)",0,"2–4",3,650,false,""],
+  ["R6","S3","Grand Suite – 1 Bedroom",1,"4",2,1800,true,"Sleeps 4, so 2 suites with 3 guys each. Star/Sky/Sea Class perks."],
+  ["R7","S3","Royal Loft Suite – 2 Bedroom (2-story)",2,"6",1,4000,true,"All 6 in one 2-story loft with a big balcony. Premium; sells out early."],
+  ["R8","S3","AquaTheater Suite – 2 Bedroom",2,"8",1,3000,true,"Sleeps 8, so all 6 together, with a wraparound balcony over the AquaTheater."],
+  ["R9","S4","Balcony cabin (budget baseline)",0,"2–4",3,550,false,""],
+  ["R10","S4","Haven Penthouse – 1 Bedroom",1,"3",2,1500,true,"Haven = private keycard area, pool, restaurant, butler. 3 guys per suite."],
+  ["R11","S4","Haven 2-Bedroom Family Villa",2,"6",1,1900,true,"Sleeps exactly 6, so everyone's in one suite with Haven access."],
+  ["R12","S6","Sea Terrace (balcony, budget baseline)",0,"2–3",3,900,false,"Tips & basic drinks included in Virgin fares; all specialty restaurants included."],
+  ["R13","S6","RockStar Suite – Gorgeous/Posh Suite",1,"2–4",3,2500,true,"RockStar perks: in-suite bar setup, priority, VIP access. Confirm max guests per suite."],
+  ["R14","S10","Balcony cabin (budget baseline)",0,"2–4",3,700,false,"Balcony seen at $703–739 pp on other Utopia March sailings."],
+  ["R15","S10","Grand Suite – 1 Bedroom",1,"4",2,1600,true,""],
+  ["R16","S10","Royal Loft Suite – 2 Bedroom",2,"6",1,3500,true,"Confirm availability on Utopia when quoting."],
+  ["R17","S9","Haven 2-Bedroom Family Villa",2,"6",1,1500,true,"3-night version of R11 on Mar 5."],
+].map(r => ({id:r[0], sail:r[1], type:r[2], beds:r[3], sleeps:r[4], rooms:r[5], est:r[6], suite:r[7], note:r[8]}));
+
+// pkgDay already includes the service charge
+const EXTRAS = {
+  "Carnival":        {pkg:"CHEERS!", pkgDay:81.42, tip:17, tipSuite:19, wifi:18, rule:"Max 15 alcoholic drinks/day. Everyone in the cabin must buy it, for the full cruise."},
+  "Royal Caribbean": {pkg:"Deluxe Beverage Package", pkgDay:93.22, tip:18.5, tipSuite:21, wifi:22, rule:"Price varies by sailing; watch for 20–40% off sales pre-cruise. Everyone in the cabin must buy it."},
+  "Norwegian (NCL)": {pkg:"Premium Plus / More at Sea", pkgDay:130.80, tip:20, tipSuite:25, wifi:0, rule:"More at Sea bundles open bar, Wi-Fi and specialty dining, and is often cheaper than buying drinks separately."},
+  "MSC Cruises":     {pkg:"Premium Extra", pkgDay:81.42, tip:17, tipSuite:23, wifi:20, rule:"Yacht Club fares typically include drinks."},
+  "Virgin Voyages":  {pkg:"Bar Tab (prepaid)", pkgDay:60, tip:22, tipSuite:22, wifi:0, rule:"No unlimited package. Prepay a Bar Tab for bonus credit. Basic drinks & Wi-Fi included."},
+};
+
+const DEALS = [
+  ["Carnival","Military fares, cabin upgrades and/or onboard credit (varies by sailing)","Active & retired military; veterans with 2+ yrs or wartime service, honorably discharged","LES, DD-214 or DD-256 (VA card NOT accepted)","Early Saver fare (price-drop protection), casino offers, past-guest VIFP rates"],
+  ["Royal Caribbean","Military/veteran rates on select sailings (not a flat %). Ran a strong veterans' deal in May 2026, so watch around Veterans Day (Nov 11)","Active, retired, veterans, certain spouses","Veterans: DD-214 + photo ID at check-in","BOGO-60% / 30% off sales; drink package sales; Crown & Anchor rates"],
+  ["Norwegian (NCL)","10% off cruise fare; stacks with Free at Sea / More at Sea","Service members, veterans and dependents","ID.me verification","More at Sea bundle (drinks, Wi-Fi, dining, excursion credit); 3rd/4th guest discounts"],
+  ["MSC Cruises","5% off Inside/Ocean View; 10% off Balcony, Suite & Yacht Club","Active & retired military + family","Military ID at booking (veterans: confirm DD-214 is accepted)","Kids-sail-free / BOGO promos; Yacht Club promos"],
+  ["Virgin Voyages","Up to 15% off select voyages, on top of other promos","Active, veterans, spouses; also first responders","Military ID + passport at check-in","Bar Tab bonus credit promos; Sailor Loot onboard credit"],
+];
+
+const PORTS = [
+  ["Port Canaveral (Orlando)",830,"~12 hr","MCO, ~45 min to port","~$20–25/day","Shortest Florida drive. Many hotels offer park-and-cruise packages."],
+  ["Miami",950,"~14 hr","MIA (15 min), FLL (45 min)","~$25/day","Flying MEM/BNA → MIA is often easiest for a Monday Mar 1 departure."],
+  ["Fort Lauderdale",925,"~13.5 hr","FLL (10 min)","~$20/day","Not in the top picks, but Celebrity, Princess and RCI sail short trips here."],
+  ["New Orleans (Gulf option)",400,"~6 hr","MSY","~$20–25/day","Carnival & NCL run 4–5 night Cozumel trips; an easy drive for the group."],
+  ["Mobile (Gulf option)",370,"~5.5 hr","MOB","~$20/day","Carnival 4–5 night Cozumel/Progreso trips."],
+];
+const PORT_MILES = {"Miami":950, "Port Canaveral":830};
+
+const CHECKS = [
+  ["Group agrees on budget range & room setup","2026-11-04","Use the Compare table."],
+  ["Everyone confirms military eligibility docs (DD-214 / ID)","2026-11-04","Needed to claim military rates."],
+  ["Final payment due: suites (typically ~120 days out)","2026-11-01","Varies by line/fare; confirm on your booking."],
+  ["Book cabins + pay deposit","2026-11-11","Suites & 2-bedroom villas sell out first. Deposits usually $100–$250 pp (often refundable on standard fares)."],
+  ["Buy travel insurance (within ~14 days of deposit)","2026-11-25",""],
+  ["Final payment due: standard cabins (~75–90 days out)","2026-12-01","Varies by line."],
+  ["Check passports (recommended), or birth certificate + photo ID","2026-12-01","Closed-loop cruises allow a birth certificate + ID, but a passport lets you fly home if something goes wrong abroad. Renewals can take 6+ weeks."],
+  ["Book flights or plan drive/carpool","2026-12-31",""],
+  ["Book hotel night before","2027-01-15",""],
+  ["Book excursions / cabana","2027-01-30",""],
+  ["Online check-in & pick arrival time","2027-02-15","Opens ~90 days out on most lines."],
+  ["Buy drink package / Wi-Fi pre-cruise (watch for sales)","2027-02-22","Pre-cruise prices are cheaper than onboard."],
+];
+
+// ---------- helpers ----------
+const $ = s => document.querySelector(s);
+const money = n => "$" + Math.round(n).toLocaleString("en-US");
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const parseDate = s => { const [y,m,d] = s.split("-").map(Number); return new Date(y, m-1, d); };
+const fmtDate = s => parseDate(s).toLocaleDateString("en-US", {weekday:"short", month:"short", day:"numeric"});
+const sailById = id => SAILINGS.find(s => s.id === id);
+const store = {
+  get(k, d) { try { const v = localStorage.getItem("c4tf:" + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem("c4tf:" + k, JSON.stringify(v)); } catch {} },
+};
+
+// ---------- sailings ----------
+const filterState = { timing: "all" };
+function renderFilters() {
+  const opts = [["all","All sailings"],["clear","Before spring break"],["edge","Edge"],["peak","Peak spring break"],["easter","Easter week"],["adults","Adults-only"]];
+  $("#sailFilters").innerHTML = opts.map(([k,l]) =>
+    `<button class="chip" type="button" data-k="${k}" aria-pressed="${filterState.timing===k}">${l}</button>`).join("");
+}
+function renderSailings() {
+  const list = SAILINGS.filter(s => filterState.timing === "all" ? true
+    : filterState.timing === "adults" ? s.adults : s.timing === filterState.timing);
+  $("#sailGrid").innerHTML = list.map(s => {
+    const [cls, lbl] = TIMING[s.timing];
+    const rooms = ROOMS.filter(r => r.sail === s.id).length;
+    return `<article class="card sail">
+      <div class="top"><div><div class="line">${esc(s.line)}</div><h3>${esc(s.ship)}</h3></div><span class="id">${s.id}</span></div>
+      <div class="dates">${fmtDate(s.depart)} → ${fmtDate(s.ret)} · ${s.nights} nights</div>
+      <div class="ports">⚓ ${esc(s.port)} · ${esc(s.ports)}</div>
+      <div class="pills"><span class="pill ${cls}">${lbl}</span>${s.adults ? '<span class="pill adult">Adults only 18+</span>' : ""}</div>
+      ${s.note ? `<div class="note">${esc(s.note)}</div>` : ""}
+      <div class="foot">
+        <div class="price">${s.fare ? money(s.fare) : "Quote"}<small>${s.fare ? "from, per person · " + esc(s.cabin) : "no March fare published"}</small></div>
+        ${rooms ? `<button class="btn ghost" type="button" data-sail="${s.id}">${rooms} room option${rooms>1?"s":""} →</button>` : ""}
+      </div>
+    </article>`;
+  }).join("") || `<p style="color:var(--muted)">No sailings match.</p>`;
+}
+$("#sailFilters").addEventListener("click", e => {
+  const b = e.target.closest(".chip"); if (!b) return;
+  filterState.timing = b.dataset.k; renderFilters(); renderSailings();
+});
+$("#sailGrid").addEventListener("click", e => {
+  const b = e.target.closest("[data-sail]"); if (!b) return;
+  const r = ROOMS.find(r => r.sail === b.dataset.sail);
+  selectRoom(r.id); $("#calc").scrollIntoView();
+});
+
+// ---------- calculator ----------
+const INPUTS = ["group","excursions","hotel","insurance","spending","miles","mpg","gas","cars","parking"];
+const quotes = store.get("quotes", {});
+let state = store.get("calc", null);
+
+function inputs() {
+  const v = {}; INPUTS.forEach(k => v[k] = Math.max(0, parseFloat($("#"+k).value) || 0));
+  v.group = Math.max(1, v.group); v.mpg = Math.max(1, v.mpg);
+  v.drinks = $("#drinks").checked; v.wifi = $("#wifi").checked;
+  return v;
+}
+
+function costFor(room, v) {
+  const s = sailById(room.sail), x = EXTRAS[s.line];
+  const fare = quotes[room.id] > 0 ? quotes[room.id] : room.est;
+  const tips = (room.suite ? x.tipSuite : x.tip) * s.nights;
+  const drinks = v.drinks ? x.pkgDay * s.nights : 0;
+  const wifi = v.wifi ? x.wifi * s.nights : 0;
+  const gasCost = (v.miles * 2 / v.mpg) * v.gas * v.cars / v.group;
+  const parkCost = v.parking * (s.nights + 1) * v.cars / v.group;
+  const other = v.excursions + gasCost + parkCost + v.hotel + v.insurance + v.spending;
+  const allin = fare + tips + drinks + wifi + other;
+  return { s, x, fare, tips, drinks, wifi, gasCost, parkCost, other, allin, share: fare + tips + drinks + wifi, perNight: allin / s.nights, group: allin * v.group };
+}
+
+function renderRoomSelect() {
+  $("#roomSel").innerHTML = SAILINGS.filter(s => ROOMS.some(r => r.sail === s.id)).map(s =>
+    `<optgroup label="${s.id} · ${esc(s.ship)} · ${fmtDate(s.depart)} (${s.nights} nts)">` +
+    ROOMS.filter(r => r.sail === s.id).map(r => `<option value="${r.id}">${r.id} · ${esc(r.type)}</option>`).join("") +
+    `</optgroup>`).join("");
+}
+
+function selectRoom(id) {
+  const r = ROOMS.find(r => r.id === id); if (!r) return;
+  $("#roomSel").value = id;
+  const s = sailById(r.sail);
+  if (PORT_MILES[s.port]) $("#miles").value = PORT_MILES[s.port];
+  $("#quote").value = quotes[id] || "";
+  recalc();
+}
+
+function recalc() {
+  const v = inputs();
+  const room = ROOMS.find(r => r.id === $("#roomSel").value);
+  const c = costFor(room, v);
+  $("#roomSum").innerHTML = `<span><b>${esc(c.s.line)}</b> · ${esc(c.s.ship)}</span><span>${esc(c.s.port)} · ${fmtDate(c.s.depart)}</span><span><b>${c.s.nights}</b> nights</span><span><b>${room.rooms}</b> room${room.rooms>1?"s":""} for 6</span><span>Sleeps ${room.sleeps}</span><span>Est. ${money(room.est)} pp</span>`;
+  const note = [room.note, c.x.rule].filter(Boolean).join(" ");
+  $("#roomNote").hidden = !note; $("#roomNote").textContent = note;
+
+  const rows = [
+    ["Cruise fare" + (quotes[room.id] > 0 ? " (your quote)" : " (estimate)"), c.fare],
+    ["Gratuities" + (room.suite ? " (suite rate)" : ""), c.tips],
+    ["Drinks: " + c.x.pkg, c.drinks],
+    ["Wi-Fi", c.wifi],
+    ["Excursions / cabana share", v.excursions],
+    ["Gas to port (your share)", c.gasCost],
+    ["Port parking (your share)", c.parkCost],
+    ["Hotel night before", v.hotel],
+    ["Travel insurance", v.insurance],
+    ["Spending money", v.spending],
+  ];
+  const max = Math.max(...rows.map(r => r[1]), 1);
+  $("#breakdown").innerHTML = rows.map(([k, n]) =>
+    `<tr><td>${esc(k)}<div class="bar"><i style="width:${(n/max*100).toFixed(1)}%"></i></div></td><td class="num">${money(n)}</td><td class="num">${money(n*v.group)}</td></tr>`).join("") +
+    `<tr class="total"><td>Total all-in</td><td class="num">${money(c.allin)}</td><td class="num">${money(c.group)}</td></tr>`;
+  $("#totPP").textContent = money(c.allin);
+  $("#totNight").textContent = money(c.perNight);
+  $("#totGroup").textContent = money(c.group);
+  $("#totShare").textContent = money(c.share);
+
+  shareNow = c.share;
+  store.set("calc", { room: room.id, inputs: Object.fromEntries(INPUTS.map(k => [k, $("#"+k).value])), drinks: v.drinks, wifi: v.wifi });
+  renderCompare(v, room.id);
+  renderPayments();
+  renderCountdown(c.s);
+}
+
+$("#roomSel").addEventListener("change", e => selectRoom(e.target.value));
+$("#quote").addEventListener("input", e => {
+  const id = $("#roomSel").value, n = parseFloat(e.target.value);
+  if (n > 0) quotes[id] = n; else delete quotes[id];
+  store.set("quotes", quotes); recalc();
+});
+[...INPUTS, "drinks", "wifi"].forEach(k => $("#"+k).addEventListener("input", recalc));
+
+// ---------- compare ----------
+let sortKey = "allin", sortDir = 1;
+function renderCompare(v, selId) {
+  const rows = ROOMS.map(r => { const c = costFor(r, v); return { r, c,
+    id: +r.id.slice(1), line: c.s.line + c.s.ship, depart: c.s.depart, nights: c.s.nights, type: r.type, rooms: r.rooms,
+    fare: c.fare, tips: c.tips, drinks: c.drinks, wifi: c.wifi, other: c.other, allin: c.allin, group: c.group }; });
+  rows.sort((a, b) => (a[sortKey] > b[sortKey] ? 1 : a[sortKey] < b[sortKey] ? -1 : 0) * sortDir);
+  $("#cmp tbody").innerHTML = rows.map(({r, c}) => `<tr data-room="${r.id}" class="${r.id===selId?"sel":""}" style="cursor:pointer">
+    <td class="rid">${r.id}</td><td>${esc(c.s.ship)}<div style="color:var(--muted);font-size:12px">${esc(c.s.line)}</div></td>
+    <td>${fmtDate(c.s.depart)}</td><td class="num">${c.s.nights}</td><td>${esc(r.type)}</td><td class="num">${r.rooms}</td>
+    <td class="num">${money(c.fare)}</td><td class="num">${money(c.tips)}</td><td class="num">${money(c.drinks)}</td><td class="num">${money(c.wifi)}</td>
+    <td class="num">${money(c.other)}</td><td class="num allin">${money(c.allin)}</td><td class="num">${money(c.group)}</td></tr>`).join("");
+  document.querySelectorAll("#cmp th").forEach(th => {
+    if (th.dataset.k === sortKey) th.setAttribute("aria-sort", sortDir > 0 ? "ascending" : "descending");
+    else th.removeAttribute("aria-sort");
+  });
+}
+$("#cmp thead").addEventListener("click", e => {
+  const th = e.target.closest("th"); if (!th) return;
+  if (sortKey === th.dataset.k) sortDir *= -1; else { sortKey = th.dataset.k; sortDir = 1; }
+  recalc();
+});
+$("#cmp tbody").addEventListener("click", e => {
+  const tr = e.target.closest("tr[data-room]"); if (!tr) return;
+  selectRoom(tr.dataset.room); $("#calc").scrollIntoView();
+});
+
+// ---------- countdown ----------
+let cdTimer;
+function renderCountdown(s) {
+  clearInterval(cdTimer);
+  const target = parseDate(s.depart); target.setHours(16);
+  const tick = () => {
+    let ms = Math.max(0, target - new Date());
+    const d = Math.floor(ms / 864e5); ms -= d * 864e5;
+    const h = Math.floor(ms / 36e5); ms -= h * 36e5;
+    const m = Math.floor(ms / 6e4); const sec = Math.floor((ms - m * 6e4) / 1000);
+    $("#countdown").innerHTML = [[d,"Days"],[h,"Hours"],[m,"Mins"],[sec,"Secs"]].map(([n,l]) =>
+      `<div class="unit"><div class="num">${String(n).padStart(2,"0")}</div><div class="lbl">${l}</div></div>`).join("");
+  };
+  tick(); cdTimer = setInterval(tick, 1000);
+  $("#countdownCap").textContent = `Until ${s.ship} sails from ${s.port} · ${fmtDate(s.depart)}, 2027`;
+}
+
+// ---------- intel / movement ----------
+$("#intelGrid").innerHTML = DEALS.map(([line, disc, who, proof, other]) => `<div class="card">
+  <h3>${esc(line)}</h3><dl>
+  <dt>Military discount</dt><dd>${esc(disc)}</dd>
+  <dt>Who qualifies</dt><dd>${esc(who)}</dd>
+  <dt>Proof needed</dt><dd>${esc(proof)}</dd>
+  <dt>Also ask about</dt><dd>${esc(other)}</dd></dl></div>`).join("");
+$("#extrasNote").innerHTML = Object.entries(EXTRAS).map(([l, x]) =>
+  `${esc(l)}: ${esc(x.pkg)} ~${money(x.pkgDay)}/day, tips $${x.tip}–${x.tipSuite}/day`).join(" · ");
+$("#portGrid").innerHTML = PORTS.map(([name, mi, time, air, park, note]) => `<div class="card port">
+  <h3>${esc(name)}</h3>
+  <div class="stat"><div>${mi}<span>miles one way</span></div><div>${esc(time)}<span>drive</span></div></div>
+  <p>✈ ${esc(air)}</p><p>🅿 ${esc(park)}</p><p style="color:var(--muted)">${esc(note)}</p></div>`).join("");
+
+// ---------- checklist ----------
+const done = store.get("checks", {});
+function renderChecks() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const sorted = CHECKS.map((c, i) => ({c, i})).sort((a, b) => a.c[1].localeCompare(b.c[1]));
+  $("#checks").innerHTML = sorted.map(({c: [t, due, n], i}) => {
+    const days = Math.round((parseDate(due) - today) / 864e5);
+    const cls = done[i] ? "done" : days < 0 ? "overdue" : days <= 14 ? "soon" : "";
+    const rel = days < 0 ? `${-days}d overdue` : days === 0 ? "today" : `in ${days}d`;
+    return `<label class="check ${cls}"><input type="checkbox" data-i="${i}" ${done[i]?"checked":""}>
+      <div><div class="t">${esc(t)}</div>${n?`<div class="n">${esc(n)}</div>`:""}</div>
+      <div class="due">${parseDate(due).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})}<small>${done[i]?"done":rel}</small></div></label>`;
+  }).join("");
+}
+$("#checks").addEventListener("change", e => {
+  const i = e.target.dataset.i; if (i == null) return;
+  if (e.target.checked) done[i] = true; else delete done[i];
+  store.set("checks", done); renderChecks();
+});
+
+// ---------- payments ----------
+const DEFAULT_PAY = [{name:"Jerry",cabin:"",dep:250,other:0},...[2,3,4,5,6].map(n => ({name:"Brother "+n,cabin:"",dep:0,other:0}))];
+let pay = store.get("pay", null) || structuredClone(DEFAULT_PAY);
+let shareNow = 0;
+function renderPayments() {
+  const body = $("#payBody");
+  const focused = document.activeElement && body.contains(document.activeElement) ? [document.activeElement.dataset.r, document.activeElement.dataset.f] : null;
+  body.innerHTML = pay.map((p, r) => {
+    const paid = (+p.dep||0) + (+p.other||0), bal = shareNow - paid;
+    return `<tr>
+      <td><input type="text" data-r="${r}" data-f="name" value="${esc(p.name)}" aria-label="Name"></td>
+      <td><input type="text" data-r="${r}" data-f="cabin" value="${esc(p.cabin)}" aria-label="Cabin or roommate"></td>
+      <td class="num">${money(shareNow)}</td>
+      <td class="num"><input type="number" min="0" data-r="${r}" data-f="dep" value="${p.dep||""}" aria-label="Deposit paid"></td>
+      <td class="num"><input type="number" min="0" data-r="${r}" data-f="other" value="${p.other||""}" aria-label="Other payments"></td>
+      <td class="num">${money(paid)}</td>
+      <td class="num ${bal>0.5?"bal-pos":"bal-zero"}">${bal>0.5?money(bal):"Paid ✓"}</td>
+      <td><button class="btn ghost" type="button" data-del="${r}" aria-label="Remove">✕</button></td></tr>`;
+  }).join("");
+  const tPaid = pay.reduce((a, p) => a + (+p.dep||0) + (+p.other||0), 0);
+  $("#payShare").textContent = money(shareNow * pay.length);
+  $("#payPaid").textContent = money(tPaid);
+  $("#payBal").textContent = money(Math.max(0, shareNow * pay.length - tPaid));
+  if (focused) { const el = body.querySelector(`[data-r="${focused[0]}"][data-f="${focused[1]}"]`); if (el) { el.focus(); const l = el.value.length; try { el.setSelectionRange(l, l); } catch {} } }
+  renderRoster();
+}
+$("#payBody").addEventListener("input", e => {
+  const {r, f} = e.target.dataset; if (r == null) return;
+  pay[r][f] = (f === "dep" || f === "other") ? (parseFloat(e.target.value) || 0) : e.target.value;
+  store.set("pay", pay); renderPayments();
+});
+$("#payBody").addEventListener("click", e => {
+  const b = e.target.closest("[data-del]"); if (!b) return;
+  pay.splice(+b.dataset.del, 1); store.set("pay", pay); renderPayments();
+});
+$("#addRow").addEventListener("click", () => { pay.push({name:"Brother "+(pay.length+1),cabin:"",dep:0,other:0}); store.set("pay", pay); renderPayments(); });
+$("#resetPay").addEventListener("click", () => { if (confirm("Reset the payment tracker?")) { pay = structuredClone(DEFAULT_PAY); store.set("pay", pay); renderPayments(); } });
+
+function renderRoster() {
+  $("#roster").innerHTML = pay.map(p => `<span class="dogtag">${esc((p.name || "—").toUpperCase())}</span>`).join("");
+}
+
+// ---------- init ----------
+renderFilters(); renderSailings(); renderRoomSelect(); renderChecks();
+if (state) {
+  Object.entries(state.inputs || {}).forEach(([k, v]) => { if ($("#"+k)) $("#"+k).value = v; });
+  $("#drinks").checked = state.drinks !== false; $("#wifi").checked = state.wifi !== false;
+}
+$("#roomSel").value = state?.room || "R2";
+$("#quote").value = quotes[$("#roomSel").value] || "";
+recalc();
+</script>
+</body>
+</html>
