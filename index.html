@@ -138,6 +138,19 @@
   .cheap { margin-bottom: 14px; border-color: var(--olive-2); display: flex; gap: 12px 18px; align-items: center; flex-wrap: wrap; font-size: 14px; color: #cfdbe6; }
   .cheap b { color: #fff; font-size: 17px; }
   .cheap .amt { font-family: "Black Ops One"; color: var(--sunset); font-size: 22px; }
+  .when.best { border-color: var(--sunset); box-shadow: 0 0 0 1px var(--sunset) inset; }
+  .when.skip { opacity: .72; }
+  .when .stat { display: flex; gap: 18px; flex-wrap: wrap; }
+  .when .stat div { font-family: "Black Ops One"; color: var(--sand); font-size: 20px; line-height: 1; }
+  .when .stat span { display: block; font-family: Inter; font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .when ul { margin: 0; padding-left: 18px; font-size: 13px; color: #cfdbe6; }
+  .when li { margin: 2px 0; }
+  .when .ships { font-size: 13px; color: var(--muted); }
+  .badge-win { align-self: flex-start; background: var(--sunset); color: #1b1006; font: 700 12px Inter; padding: 5px 10px; border-radius: 999px; }
+  .badge-skip { align-self: flex-start; background: rgba(224,90,79,.18); color: #f08a80; border: 1px solid rgba(224,90,79,.45); font: 700 12px Inter; padding: 4px 10px; border-radius: 999px; }
+  .booktime { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+  .booktime .card { font-size: 14px; color: #cfdbe6; }
+  .booktime .card b { display: block; font-family: Oswald; text-transform: uppercase; letter-spacing: .08em; color: var(--sand); font-size: 15px; margin-bottom: 4px; }
   .six { margin-top: 14px; display: flex; gap: 12px 18px; align-items: center; flex-wrap: wrap; font-size: 14px; color: #cfdbe6; }
   .six b { color: var(--sand); }
   .six .amt { font-family: "Black Ops One"; color: var(--sunset); font-size: 22px; }
@@ -284,6 +297,7 @@
     <a class="brand" href="#top">C4TF</a>
     <div class="links">
       <a href="#picks">Top 3</a>
+      <a href="#when">When</a>
       <a href="#sailings">Sailings</a>
       <a href="#calc">Calculator</a>
       <a href="#compare">Compare</a>
@@ -334,6 +348,21 @@
       <div class="card cheap" id="cheapest"></div>
       <div class="picks" id="picksGrid"></div>
       <div class="card six" id="sixTogether"></div>
+    </div>
+  </section>
+
+  <section id="when">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <div class="tag">Best time to go</div>
+          <h2>When should we link up?</h2>
+          <p>Every March week we found, side by side: what each man pays for the cheapest room, how many days off work you need, and how bad the spring-break crowd will be.</p>
+        </div>
+      </div>
+      <div class="picks" id="whenGrid"></div>
+      <div class="sub" style="margin-top:26px">When to book for the best price</div>
+      <div class="booktime" id="bookTime"></div>
     </div>
   </section>
 
@@ -725,6 +754,7 @@ function recalc() {
   renderCompare(v, room.id);
   renderPicks(v);
   renderPorts(v);
+  renderWhen(v);
   document.querySelectorAll("[data-fly]").forEach(el => el.hidden = v.travel !== "fly");
   document.querySelectorAll("[data-drive]").forEach(el => el.hidden = v.travel === "fly");
   const hp = home?.ports?.[room ? sailById(room.sail).port : ""];
@@ -781,6 +811,59 @@ const BUNK = [
 function best(rooms, v, mult) {
   return rooms.map(r => ({ r, c: costFor(r, v, mult) })).sort((a, b) => a.c.allin - b.c.allin)[0];
 }
+// ---------- best time to go ----------
+const WINDOWS = [
+  { label: "Mon Mar 1 – Fri Mar 5", sails: ["S1","S2","S3","S4","S5"], crowd: "Quiet",
+    pros: ["Before spring break, so the ship isn't full of college kids", "Most ships and the most suites to pick from"],
+    cons: ["Takes a full work week off"] },
+  { label: "Thu Mar 4 – Mon Mar 8", sails: ["S6","S7","S8"], crowd: "Quiet",
+    pros: ["Long weekend, only 2–3 days off work", "Includes the adults-only Virgin ship"],
+    cons: ["Fewer ships, and prices run higher"] },
+  { label: "Fri Mar 5 – Mon Mar 8", sails: ["S9","S10","S11","S12"], crowd: "Getting busy",
+    pros: ["Cheapest rooms of the month", "Only 2 days off work (Fri + Mon)"],
+    cons: ["Only 3 nights", "Comes back just as spring break starts"] },
+  { label: "Mar 8 – 15", sails: ["S13","S14","S15"], crowd: "Packed", skip: "Peak college spring break",
+    pros: ["Plenty of party atmosphere if that's what you want"],
+    cons: ["Ships full of college kids", "Prices go up"] },
+  { label: "Mar 25 – 29", sails: ["S16","S17"], crowd: "Packed", skip: "Easter & school break week",
+    pros: ["Long weekend options"],
+    cons: ["Families and kids everywhere", "Some of the highest prices of the month"] },
+];
+function workdaysOff(s) {
+  let n = 0;
+  for (let d = parseDate(s.depart); d <= parseDate(s.ret); d.setDate(d.getDate() + 1)) if (d.getDay() % 6) n++;
+  return n;
+}
+function renderWhen(v) {
+  const rows = WINDOWS.map(w => {
+    const sails = w.sails.map(sailById);
+    const cheap = best(sails.filter(s => s.fare).map(s => ({ id: s.id, sail: s.id, type: cabinLabel(s.cabin), beds: 0, rooms: 3, est: s.fare, suite: false })), v, 1);
+    return { w, sails, cheap, off: [...new Set(sails.map(workdaysOff))].sort((a, b) => a - b).filter((x, i, a) => i === 0 || i === a.length - 1).join("–"), nights: [...new Set(sails.map(s => s.nights))].sort().join("–") };
+  });
+  const win = rows.filter(r => !r.w.skip).sort((a, b) => a.cheap.c.allin - b.cheap.c.allin)[0];
+  $("#whenGrid").innerHTML = rows.map(r => {
+    const c = r.cheap.c, isWin = r === win;
+    return `<article class="card when pick ${isWin ? "best" : ""} ${r.w.skip ? "skip" : ""}">
+      ${isWin ? `<span class="badge-win">🏆 Best bang for the buck</span>` : r.w.skip ? `<span class="badge-skip">Skip it: ${esc(r.w.skip)}</span>` : ""}
+      <h3>${esc(r.w.label)}</h3>
+      <div class="stat">
+        <div>${money(c.allin)}<span>per man, cheapest room</span></div>
+        <div>${r.off}<span>days off work</span></div>
+        <div>${r.nights}<span>nights</span></div>
+      </div>
+      <div class="meta"><span>Crowd:</span> ${esc(r.w.crowd)} <span>·</span> <span>Cheapest:</span> ${esc(c.s.ship)} from ${money(c.fare)}</div>
+      <ul>${r.w.pros.map(x => `<li>${esc(x)}</li>`).join("")}${r.w.cons.map(x => `<li style="color:var(--muted)">${esc(x)}</li>`).join("")}</ul>
+      <div class="ships">Ships: ${[...new Set(r.sails.map(s => s.ship))].map(esc).join(", ")}</div>
+    </article>`;
+  }).join("");
+}
+$("#bookTime").innerHTML = [
+  ["Now – Nov 11", "Lock in rooms early, especially suites, which sell out first. Pick a refundable fare so you can re-book if the price drops. Watch for military deals around Veterans Day."],
+  ["Late November", "Black Friday and Cyber Monday bring some of the biggest sales of the year. Check your price and re-book if it's lower."],
+  ["January – March", "Wave Season is the other big sale window. It's late for suites, but it's still worth checking balcony and inside rooms."],
+  ["Before you sail", "Buy the drink package and Wi-Fi online before the cruise. They often go 20–40% off, and it's cheaper than buying on the ship."],
+].map(([t, d]) => `<div class="card"><b>${t}</b>${d}</div>`).join("");
+
 function renderPicks(v) {
   const cheap = best(SAILINGS.filter(s => s.fare).map(s => ({ id: s.id, sail: s.id, type: cabinLabel(s.cabin), beds: 0, rooms: 3, est: s.fare, suite: false })), v, 1);
   const cs = cheap.c.s;
