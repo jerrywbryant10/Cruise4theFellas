@@ -230,6 +230,14 @@
   .port .stat div { font-family: "Black Ops One"; color: var(--sand); font-size: 22px; line-height: 1; }
   .port .stat span { display: block; font-family: Inter; font-size: 11px; color: var(--muted); margin-top: 4px; }
   .port p { margin: 4px 0; font-size: 14px; color: #cfdbe6; }
+  .port .warn { color: var(--sunset); font-size: 13px; }
+  .home-form { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+  .home-form input { flex: 1 1 240px; font-size: 16px; padding: 11px 12px; }
+  .home-form .btn { padding: 11px 18px; font-size: 15px; }
+  #homeMsg { color: var(--muted); font-size: 13px; min-height: 20px; margin-bottom: 14px; }
+  #homeMsg.err { color: var(--red); }
+  .sub a { color: var(--sea); text-transform: none; letter-spacing: 0; font-family: Inter; font-size: 12px; margin-left: 6px; }
+  [hidden] { display: none !important; }
 
   /* Checklist */
   .checklist { display: grid; gap: 8px; }
@@ -342,7 +350,7 @@
       <div class="grid" id="sailGrid"></div>
       <div class="callout">
         <div class="card"><b>Spring break:</b> Most college breaks run roughly Mar 6–21, 2027. Easter is Sun Mar 28, and K-12 breaks cluster the week before. The cleanest window is sailings that depart Mar 1–4.</div>
-        <div class="card"><b>Gulf option:</b> New Orleans (~6 hr) and Mobile (~5.5 hr) also run 4-night cruises to Cozumel/Progreso if the group wants a shorter drive.</div>
+        <div class="card"><b>Gulf option:</b> New Orleans and Mobile also run 4-night cruises to Cozumel/Progreso, a shorter drive for anyone in the South.</div>
         <div class="card"><b>No fare listed?</b> No March 2027 price was published on the sites checked. Get a quote.</div>
       </div>
     </div>
@@ -381,14 +389,19 @@
             <label class="field">Casino &amp; spending money $ <input type="number" id="spending" min="0" value="150"></label>
           </div>
 
-          <div class="sub">Driving (Jackson, TN → port)</div>
+          <div class="sub">Getting to the port <span id="homeLabel"></span></div>
           <div class="fields">
-            <label class="field">Miles to the port <input type="number" id="miles" min="0" value="950"></label>
-            <label class="field">Miles per gallon <input type="number" id="mpg" min="1" value="25"></label>
-            <label class="field">Gas price $ <input type="number" id="gas" min="0" step="0.01" value="3.10"></label>
-            <label class="field">Cars <input type="number" id="cars" min="0" value="2"></label>
-            <label class="field">Port parking per day $ <input type="number" id="parking" min="0" value="25"></label>
+            <label class="field">Driving or flying?
+              <select id="travel"><option value="drive">Driving</option><option value="fly">Flying</option></select>
+            </label>
+            <label class="field" data-fly hidden>Round-trip flight $ <input type="number" id="flight" min="0" value="350"></label>
+            <label class="field" data-drive>Miles to the port (one way) <input type="number" id="miles" min="0" value="0"></label>
+            <label class="field" data-drive>Miles per gallon <input type="number" id="mpg" min="1" value="25"></label>
+            <label class="field" data-drive>Gas price $ <input type="number" id="gas" min="0" step="0.01" value="3.10"></label>
+            <label class="field" data-drive>Guys riding in your car <input type="number" id="riders" min="1" value="1"></label>
+            <label class="field" data-drive>Port parking per day $ <input type="number" id="parking" min="0" value="25"></label>
           </div>
+          <div class="fine" data-fly hidden>Flight price is a rough guess. Look up your own and put it in.</div>
         </div>
 
         <div style="display:grid; gap:16px; align-content:start">
@@ -460,11 +473,16 @@
     <div class="wrap">
       <div class="sec-head">
         <div>
-          <div class="tag">05 · Movement</div>
-          <h2>Getting from Jackson, TN to the port</h2>
-          <p>Plan to arrive the day <b>before</b> sailing. Miss the ship because of traffic or a delayed flight and there's no refund. MEM is ~85 mi from Jackson and BNA is ~130 mi.</p>
+          <div class="tag">05 · Getting there</div>
+          <h2>Where are you coming from?</h2>
+          <p>Type your city and state or ZIP. You'll see the drive and gas cost to each port, and your costs above update to match. Plan to get there the day <b>before</b> the ship leaves. Miss it and there's no refund.</p>
         </div>
       </div>
+      <form class="home-form" id="homeForm">
+        <input type="text" id="homeIn" placeholder="e.g. Dallas, TX or 30301" autocomplete="address-level2" aria-label="Your city and state, or ZIP">
+        <button class="btn" type="submit">Show me</button>
+      </form>
+      <div id="homeMsg" aria-live="polite"></div>
       <div class="grid" id="portGrid"></div>
     </div>
   </section>
@@ -497,7 +515,7 @@ const SAILINGS = [
   ["S2","MSC Cruises","MSC Seaside","Miami","2027-03-01",4,"2027-03-05","Nassau, Ocean Cay",287,"Inside","clear",false,"Yacht Club (ship-within-a-ship suites) available."],
   ["S3","Royal Caribbean","Wonder of the Seas","Miami","2027-03-01",4,"2027-03-05","Nassau, Perfect Day at CocoCay",null,null,"clear",false,"One of the biggest ships afloat. Has 2-bedroom Royal Loft & AquaTheater suites."],
   ["S4","Norwegian (NCL)","Norwegian Joy","Miami","2027-03-01",4,"2027-03-05","Great Stirrup Cay",null,null,"clear",false,"Has Haven 2-Bedroom Family Villa (sleeps 6, all of you in one suite)."],
-  ["S5","Carnival","Carnival Glory","Port Canaveral","2027-03-01",4,"2027-03-05","Nassau, Celebration Key",321,"Inside","clear",false,"Closest FL port to Jackson by car (~12 hr)."],
+  ["S5","Carnival","Carnival Glory","Port Canaveral","2027-03-01",4,"2027-03-05","Nassau, Celebration Key",321,"Inside","clear",false,"Port Canaveral is the closest Florida port for anyone driving down from up north."],
   ["S6","Virgin Voyages","Brilliant Lady","Miami","2027-03-04",4,"2027-03-08","Key West, Bimini Beach Club",709,"Lowest cabin","clear",true,"Adults-only. Fare includes basic drinks (soda, coffee), Wi-Fi & all restaurants."],
   ["S7","MSC Cruises","MSC Seashore","Port Canaveral","2027-03-04",3,"2027-03-07","Nassau, Ocean Cay",339,"Inside","clear",false,"Newer ship; Yacht Club available."],
   ["S8","Carnival","Carnival Freedom","Port Canaveral","2027-03-04",4,"2027-03-08","Half Moon Cay, Celebration Key",355,"Inside","clear",false,""],
@@ -556,14 +574,14 @@ const DEALS = [
   ["Virgin Voyages","Up to 15% off select voyages, on top of other promos","Active, veterans, spouses; also first responders","Military ID + passport at check-in","Bar Tab bonus credit promos; Sailor Loot onboard credit"],
 ];
 
+// key matches the port name used in SAILINGS
 const PORTS = [
-  ["Port Canaveral (Orlando)",830,"~12 hr","MCO, ~45 min to port","~$20–25/day","Shortest Florida drive. Many hotels offer park-and-cruise packages."],
-  ["Miami",950,"~14 hr","MIA (15 min), FLL (45 min)","~$25/day","Flying MEM/BNA → MIA is often easiest for a Monday Mar 1 departure."],
-  ["Fort Lauderdale",925,"~13.5 hr","FLL (10 min)","~$20/day","Not in the top picks, but Celebrity, Princess and RCI sail short trips here."],
-  ["New Orleans (Gulf option)",400,"~6 hr","MSY","~$20–25/day","Carnival & NCL run 4–5 night Cozumel trips; an easy drive for the group."],
-  ["Mobile (Gulf option)",370,"~5.5 hr","MOB","~$20/day","Carnival 4–5 night Cozumel/Progreso trips."],
+  {key:"Port Canaveral", name:"Port Canaveral (Orlando)", lat:28.4101, lon:-80.6188, air:"MCO, ~45 min to port", park:"~$20–25/day", note:"Closest Florida port if you're driving from up north. Many hotels offer park-and-cruise deals."},
+  {key:"Miami", name:"Miami", lat:25.7781, lon:-80.1794, air:"MIA (15 min), FLL (45 min)", park:"~$25/day", note:"Flying into MIA is usually easiest for the Monday, Mar 1 sailings."},
+  {key:"Fort Lauderdale", name:"Fort Lauderdale", lat:26.0918, lon:-80.1190, air:"FLL (10 min)", park:"~$20/day", note:"Not in the top picks, but Celebrity, Princess and RCI sail short trips here."},
+  {key:"New Orleans", name:"New Orleans (Gulf option)", lat:29.9387, lon:-90.0623, air:"MSY", park:"~$20–25/day", note:"Carnival & NCL run 4–5 night Cozumel trips."},
+  {key:"Mobile", name:"Mobile (Gulf option)", lat:30.6886, lon:-88.0397, air:"MOB", park:"~$20/day", note:"Carnival 4–5 night Cozumel/Progreso trips."},
 ];
-const PORT_MILES = {"Miami":950, "Port Canaveral":830};
 
 const CHECKS = [
   ["Group agrees on budget range & room setup","2026-11-04","Use the Compare table."],
@@ -630,13 +648,15 @@ $("#sailGrid").addEventListener("click", e => {
 });
 
 // ---------- calculator ----------
-const INPUTS = ["group","excursions","hotel","insurance","spending","miles","mpg","gas","cars","parking"];
+const INPUTS = ["group","excursions","hotel","insurance","spending","flight","miles","mpg","gas","riders","parking"];
+let home = store.get("home", null);
 const quotes = store.get("quotes", {});
 let state = store.get("calc", null);
 
 function inputs() {
   const v = {}; INPUTS.forEach(k => v[k] = Math.max(0, parseFloat($("#"+k).value) || 0));
-  v.group = Math.max(1, v.group); v.mpg = Math.max(1, v.mpg);
+  v.group = Math.max(1, v.group); v.mpg = Math.max(1, v.mpg); v.riders = Math.max(1, v.riders);
+  v.travel = $("#travel").value;
   v.drinks = $("#drinks").checked; v.wifi = $("#wifi").checked;
   return v;
 }
@@ -648,11 +668,14 @@ function costFor(room, v, fareMult = 1) {
   const tips = (room.suite ? x.tipSuite : x.tip) * s.nights;
   const drinks = v.drinks ? x.pkgDay * s.nights : 0;
   const wifi = v.wifi ? x.wifi * s.nights : 0;
-  const gasCost = (v.miles * 2 / v.mpg) * v.gas * v.cars / v.group;
-  const parkCost = v.parking * (s.nights + 1) * v.cars / v.group;
-  const other = v.excursions + gasCost + parkCost + v.hotel + v.insurance + v.spending;
+  const fly = v.travel === "fly";
+  const miles = home?.ports?.[s.port]?.mi ?? v.miles;
+  const flightCost = fly ? v.flight : 0;
+  const gasCost = fly ? 0 : (miles * 2 / v.mpg) * v.gas / v.riders;
+  const parkCost = fly ? 0 : v.parking * (s.nights + 1) / v.riders;
+  const other = v.excursions + flightCost + gasCost + parkCost + v.hotel + v.insurance + v.spending;
   const allin = fare + tips + drinks + wifi + other;
-  return { s, x, fare, tips, drinks, wifi, gasCost, parkCost, other, allin, share: fare + tips + drinks + wifi, perNight: allin / s.nights, group: allin * v.group };
+  return { s, x, fare, tips, drinks, wifi, flightCost, gasCost, parkCost, other, allin, share: fare + tips + drinks + wifi, perNight: allin / s.nights, group: allin * v.group };
 }
 
 function renderRoomSelect() {
@@ -666,7 +689,6 @@ function selectRoom(id) {
   const r = ROOMS.find(r => r.id === id); if (!r) return;
   $("#roomSel").value = id;
   const s = sailById(r.sail);
-  if (PORT_MILES[s.port]) $("#miles").value = PORT_MILES[s.port];
   $("#quote").value = quotes[id] || "";
   recalc();
 }
@@ -685,8 +707,8 @@ function recalc() {
     ["Drink package (" + c.x.pkg + ")", c.drinks],
     ["Wi-Fi", c.wifi],
     ["Beach day / excursions", v.excursions],
-    ["Gas to the port", c.gasCost],
-    ["Parking at the port", c.parkCost],
+    ...(v.travel === "fly" ? [["Round-trip flight", c.flightCost]] :
+      [["Gas to the port and back" + (home ? " (from " + home.name + ")" : ""), c.gasCost], ["Parking at the port", c.parkCost]]),
     ["Hotel night before", v.hotel],
     ["Travel insurance", v.insurance],
     ["Casino & spending money", v.spending],
@@ -699,9 +721,16 @@ function recalc() {
   $("#totNight").textContent = money(c.perNight);
   $("#totGroup").textContent = money(c.group);
 
-  store.set("calc", { room: room.id, inputs: Object.fromEntries(INPUTS.map(k => [k, $("#"+k).value])), drinks: v.drinks, wifi: v.wifi });
+  store.set("calc", { room: room.id, inputs: Object.fromEntries(INPUTS.map(k => [k, $("#"+k).value])), drinks: v.drinks, wifi: v.wifi, travel: v.travel });
   renderCompare(v, room.id);
   renderPicks(v);
+  renderPorts(v);
+  document.querySelectorAll("[data-fly]").forEach(el => el.hidden = v.travel !== "fly");
+  document.querySelectorAll("[data-drive]").forEach(el => el.hidden = v.travel === "fly");
+  const hp = home?.ports?.[room ? sailById(room.sail).port : ""];
+  $("#miles").disabled = !!hp;
+  if (hp) $("#miles").value = Math.round(hp.mi);
+  $("#homeLabel").innerHTML = home ? `· from ${esc(home.name)} <a href="#movement">change</a>` : `<a href="#movement">add your hometown</a>`;
   renderCountdown(c.s);
 }
 
@@ -711,7 +740,7 @@ $("#quote").addEventListener("input", e => {
   if (n > 0) quotes[id] = n; else delete quotes[id];
   store.set("quotes", quotes); recalc();
 });
-[...INPUTS, "drinks", "wifi"].forEach(k => $("#"+k).addEventListener("input", recalc));
+[...INPUTS, "drinks", "wifi", "travel"].forEach(k => $("#"+k).addEventListener("input", recalc));
 
 // ---------- compare ----------
 let sortKey = "allin", sortDir = 1;
@@ -810,10 +839,74 @@ $("#intelGrid").innerHTML = DEALS.map(([line, disc, who, proof, other]) => `<div
   <dt>Also ask about</dt><dd>${esc(other)}</dd></dl></div>`).join("");
 $("#extrasNote").innerHTML = Object.entries(EXTRAS).map(([l, x]) =>
   `${esc(l)}: ${esc(x.pkg)} ~${money(x.pkgDay)}/day, tips $${x.tip}–${x.tipSuite}/day`).join(" · ");
-$("#portGrid").innerHTML = PORTS.map(([name, mi, time, air, park, note]) => `<div class="card port">
-  <h3>${esc(name)}</h3>
-  <div class="stat"><div>${mi}<span>miles one way</span></div><div>${esc(time)}<span>drive</span></div></div>
-  <p>✈ ${esc(air)}</p><p>🅿 ${esc(park)}</p><p style="color:var(--muted)">${esc(note)}</p></div>`).join("");
+function fmtHrs(h) { const m = Math.round(h * 60); return `${Math.floor(m / 60)}h ${String(m % 60).padStart(2, "0")}m`; }
+function renderPorts(v) {
+  $("#portGrid").innerHTML = PORTS.map(p => {
+    const d = home?.ports?.[p.key];
+    const gas = d ? (d.mi * 2 / v.mpg) * v.gas : 0;
+    return `<div class="card port">
+      <h3>${esc(p.name)}</h3>
+      ${d ? `<div class="stat"><div>${Math.round(d.mi).toLocaleString()}<span>miles one way</span></div><div>${fmtHrs(d.hrs)}<span>drive</span></div><div>${money(gas)}<span>gas, round trip</span></div></div>
+        ${d.hrs > 10 ? `<p class="warn">That's a long haul. Flying is probably easier.</p>` : ""}`
+        : `<p style="color:var(--muted)">Enter your hometown above to see your drive.</p>`}
+      <p>✈ ${esc(p.air)}</p><p>🅿 ${esc(p.park)}</p><p style="color:var(--muted)">${esc(p.note)}</p></div>`;
+  }).join("");
+}
+
+// ---------- hometown lookup ----------
+async function getJSON(url, ms = 9000) {
+  const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), ms);
+  try { const r = await fetch(url, { signal: ctl.signal }); if (!r.ok) throw new Error(r.status); return await r.json(); }
+  finally { clearTimeout(t); }
+}
+async function geocode(q) {
+  try {
+    const r = await getJSON(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q)}`);
+    if (r[0]) return { lat: +r[0].lat, lon: +r[0].lon };
+  } catch {}
+  // Backup: Open-Meteo city search, matching the state if one was typed
+  const [city, region = ""] = q.split(",").map(x => x.trim());
+  const r = await getJSON(`https://geocoding-api.open-meteo.com/v1/search?count=10&language=en&name=${encodeURIComponent(city)}`);
+  const list = r.results || [];
+  const reg = region.toLowerCase();
+  const hit = list.find(x => reg && [x.admin1, x.admin1_code, x.country_code].some(a => a && a.toLowerCase() === reg)) || list[0];
+  return hit ? { lat: hit.latitude, lon: hit.longitude } : null;
+}
+function miBetween(a, b) {
+  const R = 3958.8, rad = Math.PI / 180;
+  const dLat = (b.lat - a.lat) * rad, dLon = (b.lon - a.lon) * rad;
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * rad) * Math.cos(b.lat * rad) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+async function driveTimes(from) {
+  const out = {};
+  // Fallback: straight-line distance stretched for roads, at highway speed
+  PORTS.forEach(p => { const mi = miBetween(from, p) * 1.2; out[p.key] = { mi, hrs: mi / 58 }; });
+  try {
+    const coords = [from, ...PORTS].map(p => `${p.lon},${p.lat}`).join(";");
+    const r = await getJSON(`https://router.project-osrm.org/table/v1/driving/${coords}?sources=0&annotations=distance,duration`);
+    PORTS.forEach((p, i) => {
+      const m = r.distances?.[0]?.[i + 1], sec = r.durations?.[0]?.[i + 1];
+      if (m != null && sec != null) out[p.key] = { mi: m / 1609.34, hrs: sec / 3600 };
+    });
+  } catch {}
+  return out;
+}
+$("#homeForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const q = $("#homeIn").value.trim(); if (!q) return;
+  const msg = $("#homeMsg"); msg.className = ""; msg.textContent = "Looking it up…";
+  try {
+    const at = await geocode(q);
+    if (!at) { msg.className = "err"; msg.textContent = `Couldn't find "${q}". Try a city and state, like Dallas, TX, or a ZIP code.`; return; }
+    home = { name: q, ...at, ports: await driveTimes(at) };
+    store.set("home", home);
+    msg.textContent = `Showing drives from ${q}. Your costs above now use this too.`;
+    recalc();
+  } catch {
+    msg.className = "err"; msg.textContent = "Couldn't reach the map service. Check your signal and try again.";
+  }
+});
 
 // ---------- checklist ----------
 const done = store.get("checks", {});
@@ -840,7 +933,9 @@ renderFilters(); renderSailings(); renderRoomSelect(); renderChecks();
 if (state) {
   Object.entries(state.inputs || {}).forEach(([k, v]) => { if ($("#"+k)) $("#"+k).value = v; });
   $("#drinks").checked = state.drinks !== false; $("#wifi").checked = state.wifi !== false;
+  if (state.travel) $("#travel").value = state.travel;
 }
+if (home) { $("#homeIn").value = home.name; $("#homeMsg").textContent = `Showing drives from ${home.name}.`; }
 $("#roomSel").value = state?.room || "R2";
 $("#quote").value = quotes[$("#roomSel").value] || "";
 recalc();
