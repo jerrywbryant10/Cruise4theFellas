@@ -135,6 +135,9 @@
   .pick .grp b { color: var(--sand); }
   .pick .why { font-size: 13px; color: #cfdbe6; border-top: 1px dashed var(--line); padding-top: 10px; }
   .pick .actions { margin-top: auto; }
+  .cheap { margin-bottom: 14px; border-color: var(--olive-2); display: flex; gap: 12px 18px; align-items: center; flex-wrap: wrap; font-size: 14px; color: #cfdbe6; }
+  .cheap b { color: #fff; font-size: 17px; }
+  .cheap .amt { font-family: "Black Ops One"; color: var(--sunset); font-size: 22px; }
   .six { margin-top: 14px; display: flex; gap: 12px 18px; align-items: center; flex-wrap: wrap; font-size: 14px; color: #cfdbe6; }
   .six b { color: var(--sand); }
   .six .amt { font-family: "Black Ops One"; color: var(--sunset); font-size: 22px; }
@@ -315,11 +318,12 @@
     <div class="wrap">
       <div class="sec-head">
         <div>
-          <div class="tag">Top 3 · Best bets for 6</div>
-          <h2>How do we bunk?</h2>
-          <p>The cheapest all-in option per man for each way of splitting rooms. These update with the calculator inputs below.</p>
+          <div class="tag">Top picks for the 6 of us</div>
+          <h2>Best bang for the buck</h2>
+          <p>Each price is what one man pays for everything: room, tips, drink package, Wi-Fi, gas, hotel the night before and spending money.</p>
         </div>
       </div>
+      <div class="card cheap" id="cheapest"></div>
       <div class="picks" id="picksGrid"></div>
       <div class="card six" id="sixTogether"></div>
     </div>
@@ -331,7 +335,7 @@
         <div>
           <div class="tag">01 · Sailings</div>
           <h2>March 2027 options</h2>
-          <p>Lowest "from" fares per person (usually inside cabin, two to a room), found Oct 26, 2026. Prices change daily, so verify before booking.</p>
+          <p>Cheapest room price we found per man, two to a room, as of Oct 26. Prices change every day, so double-check before booking.</p>
         </div>
       </div>
       <div class="filters" id="sailFilters" role="group" aria-label="Filter sailings"></div>
@@ -349,60 +353,58 @@
       <div class="sec-head">
         <div>
           <div class="tag">02 · Calculator</div>
-          <h2>All-in cost per man</h2>
-          <p>Pick a room setup and set your inputs. Fare, tips, drinks, Wi-Fi, gas, parking, hotel and insurance all roll up into one number.</p>
+          <h2>What it costs each man</h2>
+          <p>Pick a room and it adds up everything each man pays. Change any number to see the new total.</p>
         </div>
       </div>
       <div class="calc">
         <div class="card">
-          <label class="field">Room setup
+          <label class="field">Pick a room
             <select id="roomSel"></select>
           </label>
           <div class="room-sum" id="roomSum"></div>
           <div class="room-note" id="roomNote" hidden></div>
-          <label class="field" style="margin-bottom:12px">Your quote per person (optional, overrides the estimate)
-            <input type="number" id="quote" min="0" step="1" placeholder="Leave blank to use the estimate">
+          <label class="field" style="margin-bottom:12px">Got a real price from the cruise line? Enter it here (per man)
+            <input type="number" id="quote" min="0" step="1" placeholder="Leave blank to use our estimate">
           </label>
           <div style="display:flex; gap:18px; flex-wrap:wrap">
             <label class="toggle"><input type="checkbox" id="drinks" checked> Drink package</label>
             <label class="toggle"><input type="checkbox" id="wifi" checked> Wi-Fi</label>
           </div>
 
-          <div class="sub">Trip inputs (per person)</div>
+          <div class="sub">Other costs (per man)</div>
           <div class="fields">
-            <label class="field">Group size <input type="number" id="group" min="1" value="6"></label>
-            <label class="field">Excursions / cabana $ <input type="number" id="excursions" min="0" value="150"></label>
+            <label class="field">How many guys <input type="number" id="group" min="1" value="6"></label>
+            <label class="field">Beach day / excursions $ <input type="number" id="excursions" min="0" value="150"></label>
             <label class="field">Hotel night before $ <input type="number" id="hotel" min="0" value="60"></label>
             <label class="field">Travel insurance $ <input type="number" id="insurance" min="0" value="60"></label>
-            <label class="field">Spending money $ <input type="number" id="spending" min="0" value="150"></label>
+            <label class="field">Casino &amp; spending money $ <input type="number" id="spending" min="0" value="150"></label>
           </div>
 
           <div class="sub">Driving (Jackson, TN → port)</div>
           <div class="fields">
-            <label class="field">One-way miles <input type="number" id="miles" min="0" value="950"></label>
-            <label class="field">MPG <input type="number" id="mpg" min="1" value="25"></label>
-            <label class="field">Gas $/gal <input type="number" id="gas" min="0" step="0.01" value="3.10"></label>
+            <label class="field">Miles to the port <input type="number" id="miles" min="0" value="950"></label>
+            <label class="field">Miles per gallon <input type="number" id="mpg" min="1" value="25"></label>
+            <label class="field">Gas price $ <input type="number" id="gas" min="0" step="0.01" value="3.10"></label>
             <label class="field">Cars <input type="number" id="cars" min="0" value="2"></label>
-            <label class="field">Parking $/day per car <input type="number" id="parking" min="0" value="25"></label>
+            <label class="field">Port parking per day $ <input type="number" id="parking" min="0" value="25"></label>
           </div>
         </div>
 
         <div style="display:grid; gap:16px; align-content:start">
           <div class="card total-box">
-            <div class="k">All-in per person</div>
+            <div class="k">Each man pays about</div>
             <div class="big" id="totPP">$0</div>
             <div class="row">
               <div><b id="totNight">$0</b>per night</div>
-              <div><b id="totGroup">$0</b>whole group</div>
-              <div><b id="totShare">$0</b>cruise share*</div>
+              <div><b id="totGroup">$0</b>all of us</div>
             </div>
           </div>
           <div class="card">
             <table class="breakdown">
-              <thead><tr><th>Cost item</th><th class="num">Per person</th><th class="num">Group</th></tr></thead>
+              <thead><tr><th>What</th><th class="num">Each man</th><th class="num">All of us</th></tr></thead>
               <tbody id="breakdown"></tbody>
             </table>
-            <div class="fine">*Cruise share = fare + tips + drinks + Wi-Fi, the part you pay the cruise line.</div>
           </div>
         </div>
       </div>
@@ -415,24 +417,24 @@
         <div>
           <div class="tag">03 · Compare</div>
           <h2>Every room, side by side</h2>
-          <p>Uses your calculator inputs and toggles. Click a column header to sort, or click a row to load it into the calculator.</p>
+          <p>Every room we looked at, cheapest first. Tap a column to sort it, or tap a row to see its full breakdown.</p>
         </div>
       </div>
       <div class="table-scroll">
         <table id="cmp">
           <thead><tr>
             <th data-k="id">Room</th><th data-k="line">Line / Ship</th><th data-k="depart">Depart</th><th data-k="nights" class="num">Nts</th>
-            <th data-k="type">Room type</th><th data-k="rooms" class="num">Rooms</th><th data-k="fare" class="num">Fare</th><th data-k="tips" class="num">Tips</th>
-            <th data-k="drinks" class="num">Drinks</th><th data-k="wifi" class="num">Wi-Fi</th><th data-k="other" class="num">Other</th>
-            <th data-k="allin" class="num" aria-sort="ascending">All-in pp</th><th data-k="group" class="num">Group</th>
+            <th data-k="type">Room</th><th data-k="rooms" class="num"># Rooms</th><th data-k="fare" class="num">Room</th><th data-k="tips" class="num">Tips</th>
+            <th data-k="drinks" class="num">Drinks</th><th data-k="wifi" class="num">Wi-Fi</th><th data-k="other" class="num">Travel &amp; fun</th>
+            <th data-k="allin" class="num" aria-sort="ascending">Each man</th><th data-k="group" class="num">All of us</th>
           </tr></thead>
           <tbody></tbody>
         </table>
       </div>
       <div class="callout">
-        <div class="card"><b>How to read it:</b> Estimates assume full rooms (2 per balcony, 3 per 1-bedroom suite, 6 per 2-bedroom suite). The 3rd through 6th guests in a suite often pay less, so ask for the <b>total</b> suite price and divide by 6.</div>
-        <div class="card"><b>Carnival &amp; MSC</b> don't offer true 2-bedroom suites on these ships. Ask about connecting cabins or suites instead.</div>
-        <div class="card"><b>Other extras:</b> shore excursions ($50–$150 each), specialty dining ($40–$75 pp per meal), casino, photos, and private-island cabanas ($300–$1,000+ split).</div>
+        <div class="card"><b>Good to know:</b> Prices assume the rooms are full: 2 per balcony, 3 per 1-bedroom suite, 6 per 2-bedroom suite. When you call, ask for the <b>total</b> room price and split it 6 ways.</div>
+        <div class="card"><b>Carnival &amp; MSC</b> don't have 2-bedroom suites on these ships. Ask for rooms next to each other.</div>
+        <div class="card"><b>Not included:</b> excursions ($50–$150 each), steakhouse-type restaurants ($40–$75 a meal), casino, photos, and a beach cabana on the private island ($300–$1,000+, split 6 ways).</div>
       </div>
     </div>
   </section>
@@ -512,26 +514,26 @@ const SAILINGS = [
 
 const TIMING = {
   clear:  ["clear",  "Before spring break"],
-  edge:   ["edge",   "Edge: returns as breaks start"],
+  edge:   ["edge",   "Back as spring break starts"],
   peak:   ["peak",   "Peak college spring break"],
   easter: ["easter", "Easter / K-12 break week"],
 };
 
 const ROOMS = [
-  ["R1","S1","Balcony cabin (budget baseline)",0,"2–4",3,450,false,"2 per cabin. Cheapest real comfort."],
+  ["R1","S1","Balcony cabin",0,"2–4",3,450,false,"2 per cabin. Cheapest real comfort."],
   ["R2","S1","Grand Suite",1,"2–4",3,1100,true,"Carnival's top suite on Conquest; priority boarding (Faster to the Fun). No 2-bedroom suites on this ship."],
-  ["R3","S2","Balcony cabin (budget baseline)",0,"2–4",3,400,false,""],
+  ["R3","S2","Balcony cabin",0,"2–4",3,400,false,""],
   ["R4","S2","Yacht Club Deluxe Suite",1,"2–4",3,1260,true,"Yacht Club: private pool, lounge and restaurant, plus a butler. Yacht Club fares normally INCLUDE a drink package, so confirm when quoting. No true 2-bedroom suite."],
-  ["R5","S3","Balcony cabin (budget baseline)",0,"2–4",3,650,false,""],
+  ["R5","S3","Balcony cabin",0,"2–4",3,650,false,""],
   ["R6","S3","Grand Suite – 1 Bedroom",1,"4",2,1800,true,"Sleeps 4, so 2 suites with 3 guys each. Star/Sky/Sea Class perks."],
   ["R7","S3","Royal Loft Suite – 2 Bedroom (2-story)",2,"6",1,4000,true,"All 6 in one 2-story loft with a big balcony. Premium; sells out early."],
   ["R8","S3","AquaTheater Suite – 2 Bedroom",2,"8",1,3000,true,"Sleeps 8, so all 6 together, with a wraparound balcony over the AquaTheater."],
-  ["R9","S4","Balcony cabin (budget baseline)",0,"2–4",3,550,false,""],
+  ["R9","S4","Balcony cabin",0,"2–4",3,550,false,""],
   ["R10","S4","Haven Penthouse – 1 Bedroom",1,"3",2,1500,true,"Haven = private keycard area, pool, restaurant, butler. 3 guys per suite."],
   ["R11","S4","Haven 2-Bedroom Family Villa",2,"6",1,1900,true,"Sleeps exactly 6, so everyone's in one suite with Haven access."],
-  ["R12","S6","Sea Terrace (balcony, budget baseline)",0,"2–3",3,900,false,"Tips & basic drinks included in Virgin fares; all specialty restaurants included."],
+  ["R12","S6","Sea Terrace (balcony)",0,"2–3",3,900,false,"Tips & basic drinks included in Virgin fares; all specialty restaurants included."],
   ["R13","S6","RockStar Suite – Gorgeous/Posh Suite",1,"2–4",3,2500,true,"RockStar perks: in-suite bar setup, priority, VIP access. Confirm max guests per suite."],
-  ["R14","S10","Balcony cabin (budget baseline)",0,"2–4",3,700,false,"Balcony seen at $703–739 pp on other Utopia March sailings."],
+  ["R14","S10","Balcony cabin",0,"2–4",3,700,false,"Balconies on other Utopia March trips ran $703–739 per man."],
   ["R15","S10","Grand Suite – 1 Bedroom",1,"4",2,1600,true,""],
   ["R16","S10","Royal Loft Suite – 2 Bedroom",2,"6",1,3500,true,"Confirm availability on Utopia when quoting."],
   ["R17","S9","Haven 2-Bedroom Family Villa",2,"6",1,1500,true,"3-night version of R11 on Mar 5."],
@@ -539,11 +541,11 @@ const ROOMS = [
 
 // pkgDay already includes the service charge
 const EXTRAS = {
-  "Carnival":        {pkg:"CHEERS!", pkgDay:81.42, tip:17, tipSuite:19, wifi:18, rule:"Max 15 alcoholic drinks/day. Everyone in the cabin must buy it, for the full cruise."},
-  "Royal Caribbean": {pkg:"Deluxe Beverage Package", pkgDay:93.22, tip:18.5, tipSuite:21, wifi:22, rule:"Price varies by sailing; watch for 20–40% off sales pre-cruise. Everyone in the cabin must buy it."},
-  "Norwegian (NCL)": {pkg:"Premium Plus / More at Sea", pkgDay:130.80, tip:20, tipSuite:25, wifi:0, rule:"More at Sea bundles open bar, Wi-Fi and specialty dining, and is often cheaper than buying drinks separately."},
-  "MSC Cruises":     {pkg:"Premium Extra", pkgDay:81.42, tip:17, tipSuite:23, wifi:20, rule:"Yacht Club fares typically include drinks."},
-  "Virgin Voyages":  {pkg:"Bar Tab (prepaid)", pkgDay:60, tip:22, tipSuite:22, wifi:0, rule:"No unlimited package. Prepay a Bar Tab for bonus credit. Basic drinks & Wi-Fi included."},
+  "Carnival":        {pkg:"CHEERS!", pkgDay:81.42, tip:17, tipSuite:19, wifi:18, rule:"Drink package covers up to 15 drinks a day. If one guy in a room gets it, everyone in that room has to."},
+  "Royal Caribbean": {pkg:"Deluxe Beverage Package", pkgDay:93.22, tip:18.5, tipSuite:21, wifi:22, rule:"Drink package often goes on sale 20–40% off before the cruise. If one guy in a room gets it, everyone in that room has to."},
+  "Norwegian (NCL)": {pkg:"Premium Plus / More at Sea", pkgDay:130.80, tip:20, tipSuite:25, wifi:0, rule:"NCL's More at Sea deal bundles open bar, Wi-Fi and nicer restaurants, and is often cheaper than buying drinks separately."},
+  "MSC Cruises":     {pkg:"Premium Extra", pkgDay:81.42, tip:17, tipSuite:23, wifi:20, rule:"Yacht Club rooms usually include drinks."},
+  "Virgin Voyages":  {pkg:"Bar Tab (prepaid)", pkgDay:60, tip:22, tipSuite:22, wifi:0, rule:"No unlimited drink package. Prepay a bar tab and get bonus credit. Soda, coffee and Wi-Fi are included."},
 };
 
 const DEALS = [
@@ -567,7 +569,7 @@ const CHECKS = [
   ["Group agrees on budget range & room setup","2026-11-04","Use the Compare table."],
   ["Everyone confirms military eligibility docs (DD-214 / ID)","2026-11-04","Needed to claim military rates."],
   ["Final payment due: suites (typically ~120 days out)","2026-11-01","Varies by line/fare; confirm on your booking."],
-  ["Book cabins + pay deposit","2026-11-11","Suites & 2-bedroom villas sell out first. Deposits usually $100–$250 pp (often refundable on standard fares)."],
+  ["Book cabins + pay deposit","2026-11-11","Suites & 2-bedroom villas sell out first. Deposits are usually $100–$250 per man (often refundable)."],
   ["Buy travel insurance (within ~14 days of deposit)","2026-11-25",""],
   ["Final payment due: standard cabins (~75–90 days out)","2026-12-01","Varies by line."],
   ["Check passports (recommended), or birth certificate + photo ID","2026-12-01","Closed-loop cruises allow a birth certificate + ID, but a passport lets you fly home if something goes wrong abroad. Renewals can take 6+ weeks."],
@@ -584,6 +586,7 @@ const money = n => "$" + Math.round(n).toLocaleString("en-US");
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const parseDate = s => { const [y,m,d] = s.split("-").map(Number); return new Date(y, m-1, d); };
 const fmtDate = s => parseDate(s).toLocaleDateString("en-US", {weekday:"short", month:"short", day:"numeric"});
+const cabinLabel = c => ({ "Inside": "inside room (no window)", "Balcony": "balcony room", "Lowest cabin": "cheapest room" }[c] || c);
 const sailById = id => SAILINGS.find(s => s.id === id);
 const store = {
   get(k, d) { try { const v = localStorage.getItem("c4tf:" + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
@@ -610,7 +613,7 @@ function renderSailings() {
       <div class="pills"><span class="pill ${cls}">${lbl}</span>${s.adults ? '<span class="pill adult">Adults only 18+</span>' : ""}</div>
       ${s.note ? `<div class="note">${esc(s.note)}</div>` : ""}
       <div class="foot">
-        <div class="price">${s.fare ? money(s.fare) : "Quote"}<small>${s.fare ? "from, per person · " + esc(s.cabin) : "no March fare published"}</small></div>
+        <div class="price">${s.fare ? money(s.fare) : "Call"}<small>${s.fare ? "per man · " + esc(cabinLabel(s.cabin)) : "call for a price"}</small></div>
         ${rooms ? `<button class="btn ghost" type="button" data-sail="${s.id}">${rooms} room option${rooms>1?"s":""} →</button>` : ""}
       </div>
     </article>`;
@@ -672,30 +675,29 @@ function recalc() {
   const v = inputs();
   const room = ROOMS.find(r => r.id === $("#roomSel").value);
   const c = costFor(room, v);
-  $("#roomSum").innerHTML = `<span><b>${esc(c.s.line)}</b> · ${esc(c.s.ship)}</span><span>${esc(c.s.port)} · ${fmtDate(c.s.depart)}</span><span><b>${c.s.nights}</b> nights</span><span><b>${room.rooms}</b> room${room.rooms>1?"s":""} for 6</span><span>Sleeps ${room.sleeps}</span><span>Est. ${money(room.est)} pp</span>`;
+  $("#roomSum").innerHTML = `<span><b>${esc(c.s.line)}</b> · ${esc(c.s.ship)}</span><span>${esc(c.s.port)} · ${fmtDate(c.s.depart)}</span><span><b>${c.s.nights}</b> nights</span><span><b>${room.rooms}</b> room${room.rooms>1?"s":""} for 6</span><span>Sleeps ${room.sleeps}</span><span>Room about ${money(room.est)} each</span>`;
   const note = [room.note, c.x.rule].filter(Boolean).join(" ");
   $("#roomNote").hidden = !note; $("#roomNote").textContent = note;
 
   const rows = [
-    ["Cruise fare" + (quotes[room.id] > 0 ? " (your quote)" : " (estimate)"), c.fare],
-    ["Gratuities" + (room.suite ? " (suite rate)" : ""), c.tips],
-    ["Drinks: " + c.x.pkg, c.drinks],
+    ["Room" + (quotes[room.id] > 0 ? " (your price)" : " (our estimate)"), c.fare],
+    ["Tips for the crew", c.tips],
+    ["Drink package (" + c.x.pkg + ")", c.drinks],
     ["Wi-Fi", c.wifi],
-    ["Excursions / cabana share", v.excursions],
-    ["Gas to port (your share)", c.gasCost],
-    ["Port parking (your share)", c.parkCost],
+    ["Beach day / excursions", v.excursions],
+    ["Gas to the port", c.gasCost],
+    ["Parking at the port", c.parkCost],
     ["Hotel night before", v.hotel],
     ["Travel insurance", v.insurance],
-    ["Spending money", v.spending],
+    ["Casino & spending money", v.spending],
   ];
   const max = Math.max(...rows.map(r => r[1]), 1);
   $("#breakdown").innerHTML = rows.map(([k, n]) =>
     `<tr><td>${esc(k)}<div class="bar"><i style="width:${(n/max*100).toFixed(1)}%"></i></div></td><td class="num">${money(n)}</td><td class="num">${money(n*v.group)}</td></tr>`).join("") +
-    `<tr class="total"><td>Total all-in</td><td class="num">${money(c.allin)}</td><td class="num">${money(c.group)}</td></tr>`;
+    `<tr class="total"><td>Total</td><td class="num">${money(c.allin)}</td><td class="num">${money(c.group)}</td></tr>`;
   $("#totPP").textContent = money(c.allin);
   $("#totNight").textContent = money(c.perNight);
   $("#totGroup").textContent = money(c.group);
-  $("#totShare").textContent = money(c.share);
 
   store.set("calc", { room: room.id, inputs: Object.fromEntries(INPUTS.map(k => [k, $("#"+k).value])), drinks: v.drinks, wifi: v.wifi });
   renderCompare(v, room.id);
@@ -741,34 +743,39 @@ $("#cmp tbody").addEventListener("click", e => {
 // ---------- top picks ----------
 const BUNK = [
   { label: "1 per cabin", rooms: 6, filter: r => r.beds === 0, mult: 2,
-    why: "Everybody gets his own balcony cabin. Cruise lines charge close to the price of two guests for a solo cabin, so the fare here is doubled. It's an estimate." },
+    why: "Everybody gets his own balcony room. Going solo costs about double, because the cruise line charges you for the empty bed." },
   { label: "2 per room", rooms: 3, filter: r => r.rooms === 3, mult: 1,
-    why: "Three cabins, two men each. This is the standard setup and usually the best bang for the buck." },
+    why: "Three balcony rooms, two guys each. The usual way to do it." },
   { label: "3 per room", rooms: 2, filter: r => r.rooms === 2, mult: 1,
-    why: "Two 1-bedroom suites with three men each. You get suite perks without paying for six rooms." },
+    why: "Two big suites, three guys each. More space and VIP perks." },
 ];
 function best(rooms, v, mult) {
   return rooms.map(r => ({ r, c: costFor(r, v, mult) })).sort((a, b) => a.c.allin - b.c.allin)[0];
 }
 function renderPicks(v) {
+  const cheap = best(SAILINGS.filter(s => s.fare).map(s => ({ id: s.id, sail: s.id, type: cabinLabel(s.cabin), beds: 0, rooms: 3, est: s.fare, suite: false })), v, 1);
+  const cs = cheap.c.s;
+  $("#cheapest").innerHTML = `<span class="dogtag">CHEAPEST WAY TO GO</span>
+    <div><b>${esc(cs.ship)}</b> · ${esc(cs.line)}<br><span style="color:var(--muted)">${fmtDate(cs.depart)} → ${fmtDate(cs.ret)} · ${cs.nights} nights · ${esc(cs.port)} · ${esc(cabinLabel(cs.cabin))}, 2 guys each</span></div>
+    <div class="amt">${money(cheap.c.allin)}<span style="font:12px Inter;color:var(--muted)"> per man, everything in</span></div>`;
   $("#picksGrid").innerHTML = BUNK.map((b, i) => {
     const { r, c } = best(ROOMS.filter(b.filter), v, b.mult);
     const [cls, lbl] = TIMING[c.s.timing];
     return `<article class="card pick" data-rank="${i + 1}">
       <span class="dogtag">${b.label.toUpperCase()} · ${b.rooms} ROOMS</span>
       <div><div class="line" style="font-family:Oswald;text-transform:uppercase;letter-spacing:.1em;font-size:12px;color:var(--muted)">${esc(c.s.line)}</div><h3>${esc(c.s.ship)}</h3></div>
-      <div class="room">${esc(r.type.replace(" (budget baseline)", ""))}</div>
+      <div class="room">${esc(r.type)}</div>
       <div class="meta">${fmtDate(c.s.depart)} → ${fmtDate(c.s.ret)} <span>·</span> ${c.s.nights} nights <span>·</span> ${esc(c.s.port)}</div>
       <div class="pills"><span class="pill ${cls}">${lbl}</span></div>
-      <div class="big">${money(c.allin)}<small>all-in per man</small></div>
-      <div class="grp">Fare ${money(c.fare)} pp · Group of 6: <b>${money(c.allin * 6)}</b></div>
+      <div class="big">${money(c.allin)}<small>per man, everything in</small></div>
+      <div class="grp">Room alone ${money(c.fare)} · All 6 of us: <b>${money(c.allin * 6)}</b></div>
       <div class="why">${esc(b.why)}</div>
       ${b.mult === 1 ? `<div class="actions"><button class="btn ghost" type="button" data-pick="${r.id}">Run the numbers →</button></div>` : ""}
     </article>`;
   }).join("");
   const six = best(ROOMS.filter(r => r.rooms === 1), v, 1);
   $("#sixTogether").innerHTML = `<span class="dogtag">ALL 6 · 1 SUITE</span>
-    <div>Want everybody under one roof? The best 2-bedroom suite is <b>${esc(six.c.s.ship)} · ${esc(six.r.type)}</b> (${fmtDate(six.c.s.depart)}, ${six.c.s.nights} nts).</div>
+    <div>Want everybody under one roof? The best 2-bedroom suite is <b>${esc(six.c.s.ship)} · ${esc(six.r.type)}</b> (${fmtDate(six.c.s.depart)}, ${six.c.s.nights} nights).</div>
     <div class="amt">${money(six.c.allin)}<span style="font:12px Inter;color:var(--muted)"> per man</span></div>
     <button class="btn ghost" type="button" data-pick="${six.r.id}">Run the numbers →</button>`;
 }
