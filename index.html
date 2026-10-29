@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cruise 4 the Fellas</title>
-<meta name="description" content="March 2027 guys' cruise planner: sailings, suites, all-in cost calculator, military deals and booking checklist.">
+<meta name="description" content="Spring 2027 guys' cruise planner: sailings, suites, all-in cost calculator, military deals and booking checklist.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -311,7 +311,7 @@
 <header class="hero" id="top">
   <div class="sun" aria-hidden="true"></div>
   <div class="wrap" style="position:relative">
-    <span class="eyebrow">★ Operation Shore Leave · March 2027</span>
+    <span class="eyebrow">★ Operation Shore Leave · Spring 2027</span>
     <h1>Cruise 4 the <span>Fellas</span></h1>
     <p class="lead">Six brothers, one ship, 3 to 4 nights out of Florida. We've shared tents, convoys and bad chow. This time it's the Bahamas, a balcony and a cold one.</p>
     <div class="countdown" id="countdown" aria-live="polite"></div>
@@ -357,7 +357,7 @@
         <div>
           <div class="tag">Best time to go</div>
           <h2>When should we link up?</h2>
-          <p>Every March week we found, side by side: what each man pays for the cheapest room, how many days off work you need, and how bad the spring-break crowd will be.</p>
+          <p>Every week we found, March through June, side by side: what each man pays for the cheapest room, how many days off work you need, and how bad the spring-break crowd will be.</p>
         </div>
       </div>
       <div class="picks" id="whenGrid"></div>
@@ -371,8 +371,8 @@
       <div class="sec-head">
         <div>
           <div class="tag">01 · Sailings</div>
-          <h2>March 2027 options</h2>
-          <p>Cheapest room price we found per man, two to a room, as of Oct 26. Prices change every day, so double-check before booking.<span id="hiddenNote"></span></p>
+          <h2>Spring 2027 options</h2>
+          <p>Cheapest room price we found per man, two to a room, as of late October 2026. Prices change every day, so double-check before booking.<span id="hiddenNote"></span></p>
         </div>
       </div>
       <div class="filters" id="sailFilters" role="group" aria-label="Filter sailings"></div>
@@ -534,7 +534,7 @@
 <footer>
   <div class="wrap">
     <div class="motto">Leave no man ashore.</div>
-    <p>Fares and deals come from public listings checked Oct 26, 2026 (Taoticket, Cruise Timetables, CruiseHive, Cruise Critic, the Royal Caribbean Blog and CruiseShipTracking). Estimates only. Confirm everything with the cruise line or your agent before you pay.</p>
+    <p>Fares and deals come from public listings checked Oct 26–29, 2026 (Taoticket, Cruise Timetables, Cruisebound, iCruise, CruiseSheet, Miami Cruise Guide, Virgin Voyages, CruiseHive, Cruise Critic, the Royal Caribbean Blog and CruiseShipTracking). Estimates only. Confirm everything with the cruise line or your agent before you pay.</p>
   </div>
 </footer>
 
@@ -559,6 +559,27 @@ const SAILINGS_ALL = [
   ["S15","Royal Caribbean","Utopia of the Seas","Port Canaveral","2027-03-12",3,"2027-03-15","Nassau, Perfect Day at CocoCay",739,"Balcony","peak",false,""],
   ["S16","Virgin Voyages","Scarlet Lady","Miami","2027-03-25",4,"2027-03-29","Key West, Bimini Beach Club",623,"Lowest cabin","easter",true,"Easter is Sun Mar 28, 2027."],
   ["S17","Royal Caribbean","Utopia of the Seas","Port Canaveral","2027-03-26",3,"2027-03-29","Perfect Day at CocoCay",605,"Inside","easter",false,""],
+  // April–June 2027: lowest fares found Oct 29, 2026 (web search of reseller listings)
+  ["S18","Virgin Voyages","Scarlet Lady","Miami","2027-04-08",4,"2027-04-12","Key West, Bimini Beach Club",625,"Lowest cabin","apr",true,"Adults-only. Fare includes basic drinks (soda, coffee), Wi-Fi & all restaurants."],
+  ["S19","Royal Caribbean","Utopia of the Seas","Port Canaveral","2027-04-09",3,"2027-04-12","Nassau, Perfect Day at CocoCay",615,"Inside","apr",false,"Royal Caribbean's newest short-trip party ship."],
+  ["S20","Norwegian (NCL)","Norwegian Escape","Port Canaveral","2027-04-16",3,"2027-04-19","Great Stirrup Cay, Nassau",328,"Inside","apr",false,""],
+  ["S21","Norwegian (NCL)","Norwegian Escape","Port Canaveral","2027-04-19",4,"2027-04-23","Great Stirrup Cay, Nassau",299,"Inside","apr",false,""],
+  ["S22","MSC Cruises","MSC Seashore","Port Canaveral","2027-04-22",3,"2027-04-25","Nassau, Ocean Cay",350,"Inside","apr",false,"Newer ship; Yacht Club available."],
+  ["S23","MSC Cruises","MSC Seaside","Miami","2027-04-23",3,"2027-04-26","Nassau, Ocean Cay",366,"Inside","apr",false,""],
+  ["S24","Royal Caribbean","Wonder of the Seas","Miami","2027-05-03",4,"2027-05-07","Bahamas getaway (Nassau & more)",530,"Inside","may",false,"One of the biggest ships afloat. Has 2-bedroom Royal Loft & AquaTheater suites."],
+  ["S25","Norwegian (NCL)","Norwegian Getaway","Miami","2027-05-03",4,"2027-05-07","Great Stirrup Cay, Nassau",312,"Inside","may",false,""],
+  ["S26","MSC Cruises","MSC Seaside","Miami","2027-05-14",3,"2027-05-17","Nassau, Ocean Cay",359,"Inside","may",false,""],
+  ["S27","MSC Cruises","MSC Seaside","Miami","2027-05-21",3,"2027-05-24","Nassau, Ocean Cay",379,"Inside","may",false,""],
+  ["S28","Carnival","Carnival Conquest","Miami","2027-05-28",3,"2027-05-31","Celebration Key",null,null,"memorial",false,"Listed from $249 before taxes & port fees, so call for the full price. Back on Memorial Day."],
+  ["S29","MSC Cruises","MSC Seaside","Miami","2027-05-28",3,"2027-05-31","Nassau, Ocean Cay",449,"Inside","memorial",false,"Back on Memorial Day."],
+  ["S30","Norwegian (NCL)","Norwegian Getaway","Miami","2027-05-28",3,"2027-05-31","Nassau, Great Stirrup Cay",null,null,"memorial",false,"Back on Memorial Day."],
+  ["S31","Carnival","Carnival Glory","Port Canaveral","2027-06-04",3,"2027-06-07","The Bahamas",509,"Inside","summer",false,""],
+  ["S32","MSC Cruises","MSC Seaside","Miami","2027-06-04",3,"2027-06-07","Nassau, Ocean Cay",467,"Inside","summer",false,""],
+  ["S33","MSC Cruises","MSC Seaside","Miami","2027-06-07",4,"2027-06-11","Nassau, Ocean Cay",437,"Inside","summer",false,""],
+  ["S34","MSC Cruises","MSC Seashore","Port Canaveral","2027-06-10",3,"2027-06-13","Nassau, Ocean Cay",508,"Inside","summer",false,""],
+  ["S35","Carnival","Mardi Gras","Port Canaveral","2027-06-10",4,"2027-06-14","The Bahamas",718,"Inside","summer",false,"Carnival's big newer ship, with a roller coaster on top."],
+  ["S36","MSC Cruises","MSC Seashore","Port Canaveral","2027-06-13",4,"2027-06-17","Nassau, Ocean Cay",482,"Inside","summer",false,""],
+  ["S37","Carnival","Carnival Glory","Port Canaveral","2027-06-14",4,"2027-06-18","Nassau, Celebration Key",null,null,"summer",false,""],
 ].map(r => ({id:r[0], line:r[1], ship:r[2], port:r[3], depart:r[4], nights:r[5], ret:r[6], ports:r[7], fare:r[8], cabin:r[9], timing:r[10], adults:r[11], note:r[12]}));
 const SAILINGS = SAILINGS_ALL.filter(s => new Date(s.depart + "T00:00") >= BOOK_CUTOFF);
 
@@ -567,7 +588,12 @@ const TIMING = {
   edge:   ["edge",   "Back as spring break starts"],
   peak:   ["peak",   "Peak college spring break"],
   easter: ["easter", "Easter / K-12 break week"],
+  apr:    ["clear",  "After spring break"],
+  may:    ["clear",  "Quiet season"],
+  memorial: ["edge", "Memorial Day weekend"],
+  summer: ["edge",   "Summer: school's out"],
 };
+const HOLIDAYS = ["2027-05-31"]; // Memorial Day
 
 const ROOMS = [
   ["R1","S1","Balcony cabin",0,"2–4",3,450,false,"2 per cabin. Cheapest real comfort."],
@@ -588,6 +614,10 @@ const ROOMS = [
   ["R16","S10","Royal Loft Suite – 2 Bedroom",2,"6",1,3500,true,"Confirm availability on Utopia when quoting."],
   ["R17","S9","Haven 2-Bedroom Family Villa",2,"6",1,1500,true,"3-night version of R11 on Mar 5."],
 ].map(r => ({id:r[0], sail:r[1], type:r[2], beds:r[3], sleeps:r[4], rooms:r[5], est:r[6], suite:r[7], note:r[8]}))
+  // Newer sailings only have a cheapest-room price, so each gets one "inside" option
+  .concat(SAILINGS_ALL.filter(s => +s.id.slice(1) >= 18 && s.fare).map((s, i) => ({
+    id: "R" + (18 + i), sail: s.id, type: s.cabin === "Inside" ? "Inside room (cheapest)" : "Cheapest room", beds: 0, sleeps: "2–4",
+    rooms: 3, est: s.fare, suite: false, inside: true, note: "This is the cheapest room price we found. Ask about balconies and suites when you call." })))
   .filter(r => SAILINGS.some(s => s.id === r.sail));
 
 // pkgDay already includes the service charge
@@ -647,13 +677,14 @@ const store = {
 // ---------- sailings ----------
 const filterState = { timing: "all" };
 function renderFilters() {
-  const opts = [["all","All sailings"],["clear","Before spring break"],["edge","Edge"],["peak","Peak spring break"],["easter","Easter week"],["adults","Adults-only"]];
+  const months = [...new Set(SAILINGS.map(s => s.depart.slice(0, 7)))];
+  const opts = [["all","All sailings"], ...months.map(m => [m, parseDate(m + "-01").toLocaleDateString("en-US", { month: "long" })]), ["adults","Adults-only"]];
   $("#sailFilters").innerHTML = opts.map(([k,l]) =>
     `<button class="chip" type="button" data-k="${k}" aria-pressed="${filterState.timing===k}">${l}</button>`).join("");
 }
 function renderSailings() {
   const list = SAILINGS.filter(s => filterState.timing === "all" ? true
-    : filterState.timing === "adults" ? s.adults : s.timing === filterState.timing);
+    : filterState.timing === "adults" ? s.adults : s.depart.startsWith(filterState.timing));
   $("#sailGrid").innerHTML = list.map(s => {
     const [cls, lbl] = TIMING[s.timing];
     const rooms = ROOMS.filter(r => r.sail === s.id).length;
@@ -811,9 +842,9 @@ $("#cmp tbody").addEventListener("click", e => {
 // ---------- top picks ----------
 const BUNK = [
   { label: "1 per cabin", rooms: 6, filter: r => r.beds === 0, mult: 2,
-    why: "Everybody gets his own balcony room. Going solo costs about double, because the cruise line charges you for the empty bed." },
+    why: "Everybody gets his own room. Going solo costs about double, because the cruise line charges you for the empty bed." },
   { label: "2 per room", rooms: 3, filter: r => r.rooms === 3, mult: 1,
-    why: "Three balcony rooms, two guys each. The usual way to do it." },
+    why: "Three rooms, two guys each. The usual way to do it." },
   { label: "3 per room", rooms: 2, filter: r => r.rooms === 2, mult: 1,
     why: "Two big suites, three guys each. More space and VIP perks." },
 ];
@@ -829,7 +860,7 @@ const WINDOWS = [
     pros: ["Long weekend, only 2–3 days off work", "Includes the adults-only Virgin ship"],
     cons: ["Fewer ships, and prices run higher"] },
   { label: "Fri Mar 5 – Mon Mar 8", sails: ["S9","S10","S11","S12"], crowd: "Getting busy",
-    pros: ["Cheapest rooms of the month", "Only 2 days off work (Fri + Mon)"],
+    pros: ["Cheapest rooms in March", "Only 2 days off work (Fri + Mon)"],
     cons: ["Only 3 nights", "Comes back just as spring break starts"] },
   { label: "Mar 8 – 15", sails: ["S13","S14","S15"], crowd: "Packed", skip: "Peak college spring break",
     pros: ["Plenty of party atmosphere if that's what you want"],
@@ -837,10 +868,22 @@ const WINDOWS = [
   { label: "Mar 25 – 29", sails: ["S16","S17"], crowd: "Packed", skip: "Easter & school break week",
     pros: ["Long weekend options"],
     cons: ["Families and kids everywhere", "Some of the highest prices of the month"] },
+  { label: "April", sails: ["S18","S19","S20","S21","S22","S23"], crowd: "Normal",
+    pros: ["Spring break crowds are gone", "Great weather before the summer heat", "Weekend and weekday trips to pick from"],
+    cons: ["Most rooms listed are inside rooms. Ask about balconies"] },
+  { label: "May 3 – 24", sails: ["S24","S25","S26","S27"], crowd: "Quiet",
+    pros: ["One of the quietest times of year on these ships", "Before hurricane season starts June 1"],
+    cons: ["4-night trips take a full work week off"] },
+  { label: "Memorial Day · May 28 – 31", sails: ["S28","S29","S30"], crowd: "Busy",
+    pros: ["Monday is a holiday, so only 1 day off work (Friday)", "Carnival, MSC and Norwegian all sail that weekend"],
+    cons: ["Holiday weekend crowds", "Rooms sell out fast"] },
+  { label: "June", sails: ["S31","S32","S33","S34","S35","S36","S37"], crowd: "Families",
+    pros: ["Summer weather and long days"],
+    cons: ["School's out, so more families and kids", "Hurricane season starts June 1", "Prices start climbing"] },
 ];
 function workdaysOff(s) {
   let n = 0;
-  for (let d = parseDate(s.depart); d <= parseDate(s.ret); d.setDate(d.getDate() + 1)) if (d.getDay() % 6) n++;
+  for (let d = parseDate(s.depart); d <= parseDate(s.ret); d.setDate(d.getDate() + 1)) if (d.getDay() % 6 && !HOLIDAYS.includes(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`)) n++;
   return n;
 }
 function renderWhen(v) {
@@ -859,7 +902,7 @@ function renderWhen(v) {
       <h3>${esc(r.w.label)}</h3>
       <div class="stat">
         <div>${money(c.allin)}<span>per man, cheapest room</span></div>
-        <div>${r.off}<span>days off work</span></div>
+        <div>${r.off}<span>${r.off === "1" ? "day" : "days"} off work</span></div>
         <div>${r.nights}<span>nights</span></div>
       </div>
       <div class="meta"><span>Crowd:</span> ${esc(r.w.crowd)} <span>·</span> <span>Cheapest:</span> ${esc(c.s.ship)} from ${money(c.fare)}</div>
@@ -885,7 +928,8 @@ function renderPicks(v) {
     <div><b>${esc(cs.ship)}</b> · ${esc(cs.line)}<br><span style="color:var(--muted)">${fmtDate(cs.depart)} → ${fmtDate(cs.ret)} · ${cs.nights} nights · ${esc(cs.port)} · ${esc(cabinLabel(cs.cabin))}, 2 guys each</span></div>
     <div class="amt">${money(cheap.c.allin)}<span style="font:12px Inter;color:var(--muted)"> per man, everything in</span></div>`;
   $("#picksGrid").innerHTML = BUNK.map((b, i) => {
-    const pick = best(ROOMS.filter(b.filter), v, b.mult);
+    const pool = ROOMS.filter(b.filter);
+    const pick = best(pool.filter(r => !r.inside), v, b.mult) || best(pool, v, b.mult);
     if (!pick) return "";
     const { r, c } = pick;
     const [cls, lbl] = TIMING[c.s.timing];
