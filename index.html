@@ -177,6 +177,12 @@
   .sail .dates { font-family: Oswald; font-size: 16px; color: var(--sand); }
   .sail .ports { color: #cfdbe6; font-size: 14px; }
   .sail .note { color: var(--muted); font-size: 13px; }
+  .shiplinks { display: flex; gap: 8px; flex-wrap: wrap; }
+  .shiplinks a {
+    font: 600 13px Inter; color: var(--sea); text-decoration: none;
+    border: 1px solid var(--line); border-radius: 999px; padding: 5px 11px; background: var(--navy);
+  }
+  .shiplinks a:hover { border-color: var(--sea); }
   .sail .foot { margin-top: auto; display: flex; justify-content: space-between; align-items: end; gap: 8px; padding-top: 10px; border-top: 1px dashed var(--line); }
   .price { font-family: "Black Ops One"; font-size: 26px; color: var(--sunset); line-height: 1; }
   .price small { display: block; font-family: Inter; font-size: 11px; color: var(--muted); margin-top: 4px; }
@@ -645,6 +651,28 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":
 const parseDate = s => { const [y,m,d] = s.split("-").map(Number); return new Date(y, m-1, d); };
 const fmtDate = s => parseDate(s).toLocaleDateString("en-US", {weekday:"short", month:"short", day:"numeric"});
 const cabinLabel = c => ({ "Inside": "inside room (no window)", "Balcony": "balcony room", "Lowest cabin": "cheapest room" }[c] || c);
+// Official ship and room pages (Virgin has one page for all its ships)
+const SHIP_LINKS = {
+  "Carnival Conquest":  ["https://www.carnival.com/cruise-ships/carnival-conquest", "https://www.carnival.com/cruise-ships/carnival-conquest/staterooms"],
+  "Carnival Glory":     ["https://www.carnival.com/cruise-ships/carnival-glory", "https://www.carnival.com/cruise-ships/carnival-glory/staterooms"],
+  "Carnival Freedom":   ["https://www.carnival.com/cruise-ships/carnival-freedom", "https://www.carnival.com/cruise-ships/carnival-freedom/staterooms"],
+  "Mardi Gras":         ["https://www.carnival.com/cruise-ships/mardi-gras", "https://www.carnival.com/cruise-ships/mardi-gras/staterooms"],
+  "Wonder of the Seas": ["https://www.royalcaribbean.com/cruise-ships/wonder-of-the-seas", "https://www.royalcaribbean.com/cruise-ships/wonder-of-the-seas/rooms"],
+  "Utopia of the Seas": ["https://www.royalcaribbean.com/cruise-ships/utopia-of-the-seas", "https://www.royalcaribbean.com/cruise-ships/utopia-of-the-seas/rooms"],
+  "Norwegian Joy":      ["https://www.ncl.com/cruise-ships/norwegian-joy", "https://www.ncl.com/cruise-ships/norwegian-joy/staterooms"],
+  "Norwegian Getaway":  ["https://www.ncl.com/cruise-ships/norwegian-getaway", "https://www.ncl.com/cruise-ships/norwegian-getaway/staterooms"],
+  "Norwegian Escape":   ["https://www.ncl.com/cruise-ships/norwegian-escape", "https://www.ncl.com/cruise-ships/norwegian-escape/staterooms"],
+  "MSC Seaside":        ["https://www.msccruisesusa.com/ships/msc-seaside", "https://www.msccruisesusa.com/ships/msc-seaside/cabins-suites"],
+  "MSC Seashore":       ["https://www.msccruisesusa.com/ships/msc-seashore", "https://www.msccruisesusa.com/ships/msc-seashore/cabins-suites"],
+  "Scarlet Lady":       ["https://www.virginvoyages.com/ships", null],
+  "Brilliant Lady":     ["https://www.virginvoyages.com/ships", null],
+};
+function shipLinks(ship) {
+  const [page, rooms] = SHIP_LINKS[ship] || [];
+  if (!page) return "";
+  const a = (href, label) => `<a href="${href}" target="_blank" rel="noopener">${label} ↗</a>`;
+  return `<div class="shiplinks">${a(page, "See the ship")}${rooms ? a(rooms, "See the rooms") : ""}</div>`;
+}
 const sailById = id => SAILINGS.find(s => s.id === id);
 const store = {
   get(k, d) { try { const v = localStorage.getItem("c4tf:" + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
@@ -671,6 +699,7 @@ function renderSailings() {
       <div class="ports">⚓ ${esc(s.port)} · ${esc(s.ports)}</div>
       <div class="pills"><span class="pill ${cls}">${lbl}</span>${s.adults ? '<span class="pill adult">Adults only 18+</span>' : ""}</div>
       ${s.note ? `<div class="note">${esc(s.note)}</div>` : ""}
+      ${shipLinks(s.ship)}
       <div class="foot">
         <div class="price">${s.fare ? money(s.fare) : "Call"}<small>${s.fare ? "per man · " + esc(cabinLabel(s.cabin)) : "call for a price"}</small></div>
         ${rooms ? `<button class="btn ghost" type="button" data-sail="${s.id}">${rooms} room option${rooms>1?"s":""} →</button>` : ""}
@@ -745,7 +774,7 @@ function recalc() {
     return;
   }
   const c = costFor(room, v);
-  $("#roomSum").innerHTML = `<span><b>${esc(c.s.line)}</b> · ${esc(c.s.ship)}</span><span>${esc(c.s.port)} · ${fmtDate(c.s.depart)}</span><span><b>${c.s.nights}</b> nights</span><span><b>${room.rooms}</b> room${room.rooms>1?"s":""} for 6</span><span>Sleeps ${room.sleeps}</span><span>Room about ${money(room.est)} each</span>`;
+  $("#roomSum").innerHTML = `<span><b>${esc(c.s.line)}</b> · ${esc(c.s.ship)}</span><span>${esc(c.s.port)} · ${fmtDate(c.s.depart)}</span><span><b>${c.s.nights}</b> nights</span><span><b>${room.rooms}</b> room${room.rooms>1?"s":""} for 6</span><span>Sleeps ${room.sleeps}</span><span>Room about ${money(room.est)} each</span>` + shipLinks(c.s.ship);
   const note = room.note;
   $("#roomNote").hidden = !note; $("#roomNote").textContent = note;
 
@@ -885,7 +914,7 @@ function renderPicks(v) {
   const cheap = best(SAILINGS.filter(s => s.fare).map(s => ({ id: s.id, sail: s.id, type: cabinLabel(s.cabin), beds: 0, rooms: 3, est: s.fare, suite: false, inside: s.cabin === "Inside" })), v, 1);
   const cs = cheap.c.s;
   $("#cheapest").innerHTML = `<span class="dogtag">CHEAPEST WAY TO GO</span>
-    <div><b>${esc(cs.ship)}</b> · ${esc(cs.line)}<br><span style="color:var(--muted)">${fmtDate(cs.depart)} → ${fmtDate(cs.ret)} · ${cs.nights} nights · ${esc(cs.port)} · ${esc(cabinLabel(cs.cabin))}, 2 guys each</span></div>
+    <div><b>${esc(cs.ship)}</b> · ${esc(cs.line)}<br><span style="color:var(--muted)">${fmtDate(cs.depart)} → ${fmtDate(cs.ret)} · ${cs.nights} nights · ${esc(cs.port)} · ${esc(cabinLabel(cs.cabin))}, 2 guys each</span>${shipLinks(cs.ship)}</div>
     <div class="amt">${money(cheap.c.allin)}<span style="font:12px Inter;color:var(--muted)"> per man</span></div>`;
   $("#picksGrid").innerHTML = BUNK.map((b, i) => {
     const pool = ROOMS.filter(b.filter);
@@ -897,6 +926,7 @@ function renderPicks(v) {
       <span class="dogtag">${b.label.toUpperCase()} · ${b.rooms} ROOMS</span>
       <div><div class="line" style="font-family:Oswald;text-transform:uppercase;letter-spacing:.1em;font-size:12px;color:var(--muted)">${esc(c.s.line)}</div><h3>${esc(c.s.ship)}</h3></div>
       <div class="room">${esc(r.type)}</div>
+      ${shipLinks(c.s.ship)}
       <div class="meta">${fmtDate(c.s.depart)} → ${fmtDate(c.s.ret)} <span>·</span> ${c.s.nights} nights <span>·</span> ${esc(c.s.port)}</div>
       <div class="pills"><span class="pill ${cls}">${lbl}</span></div>
       <div class="big">${money(c.allin)}<small>per man</small></div>
