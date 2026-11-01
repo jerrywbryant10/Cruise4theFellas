@@ -183,6 +183,12 @@
     border: 1px solid var(--line); border-radius: 999px; padding: 5px 11px; background: var(--navy);
   }
   .shiplinks a:hover { border-color: var(--sea); }
+  .aft { font-size: 13px; color: #cfdbe6; background: rgba(107,122,60,.18); border: 1px solid rgba(138,154,82,.5); border-radius: 10px; padding: 8px 10px; }
+  .aft b { color: var(--sand); }
+  .aft-card { border-color: var(--olive-2); margin-bottom: 14px; }
+  .aft-card h3 { color: #fff; font-size: 20px; margin-bottom: 6px; }
+  .aft-card ul { margin: 8px 0 12px; padding-left: 18px; font-size: 14px; color: #cfdbe6; }
+  .aft-card li { margin: 3px 0; }
   .sail .foot { margin-top: auto; display: flex; justify-content: space-between; align-items: end; gap: 8px; padding-top: 10px; border-top: 1px dashed var(--line); }
   .price { font-family: "Black Ops One"; font-size: 26px; color: var(--sunset); line-height: 1; }
   .price small { display: block; font-family: Inter; font-size: 11px; color: var(--muted); margin-top: 4px; }
@@ -475,6 +481,17 @@
           <p>Ask for the military rate and the current promo together, because many lines let them stack. Bring your DD-214 (veterans) or military ID.</p>
         </div>
       </div>
+      <div class="card aft-card">
+        <h3>🎖 American Forces Travel</h3>
+        <p style="margin:0;color:#cfdbe6;font-size:14px">The official military travel site (run through MWR) often beats public cruise prices.</p>
+        <ul>
+          <li><b>Who can use it:</b> active duty, Guard &amp; Reserve, retirees, and veterans with a VA service-connected disability rating. Some sites say all honorably discharged vets qualify, so try signing up.</li>
+          <li><b>Sign-up:</b> you'll need your last name, date of birth and the last 4 of your SSN.</li>
+          <li><b>Prices we saw:</b> MSC Seaside (3 nights, Miami) and MSC Seashore (4 nights, Port Canaveral) from <b>$195</b> per man for April–October 2027. Those are before taxes &amp; port fees, so compare the full price at checkout. Matching sailings show the price on their card.</li>
+          <li><b>Extras:</b> bookings come with onboard spending credit, and there's a price-match guarantee if you find it cheaper within 48 hours.</li>
+        </ul>
+        <div class="shiplinks"><a href="https://www.americanforcestravel.com" target="_blank" rel="noopener">Go to American Forces Travel ↗</a><a href="https://cruises.americanforcestravel.com/promotion/bahamas-cruises.do" target="_blank" rel="noopener">Bahamas cruises ↗</a></div>
+      </div>
       <div class="intel" id="intelGrid"></div>
       <div class="callout">
         <div class="card"><b>All lines:</b> Wave Season (Jan–Mar) and Black Friday/Cyber Monday are the biggest sale windows. Book a refundable fare now and re-price if it drops. A travel agent can link all 3 cabins as a group and often adds onboard credit.</div>
@@ -667,6 +684,23 @@ const SHIP_LINKS = {
   "Scarlet Lady":       ["https://www.virginvoyages.com/ships", null],
   "Brilliant Lady":     ["https://www.virginvoyages.com/ships", null],
 };
+// American Forces Travel (military/veteran MWR site): public "from" prices, before taxes & port fees, seen Nov 1, 2026
+const AFT_URL = {
+  "MSC Cruises": "https://cruises.americanforcestravel.com/promotion/msc-cruises.do",
+  "Carnival": "https://cruises.americanforcestravel.com/promotion/carnival-cruises.do",
+  "Norwegian (NCL)": "https://cruises.americanforcestravel.com/promotion/norwegian-cruises.do",
+};
+const AFT_DEALS = [
+  { ship: "MSC Seaside",  nights: 3, from: "2027-04-01", to: "2027-10-31", price: 195 },
+  { ship: "MSC Seashore", nights: 4, from: "2027-04-01", to: "2027-10-31", price: 195 },
+];
+function aftDeal(s) {
+  return AFT_DEALS.find(d => d.ship === s.ship && d.nights === s.nights && s.depart >= d.from && s.depart <= d.to);
+}
+function aftLine(s) {
+  const d = aftDeal(s); if (!d) return "";
+  return `<div class="aft">🎖 <b>American Forces Travel:</b> from <b>${money(d.price)}</b> per man, before taxes &amp; port fees. <a href="${AFT_URL[s.line]}" target="_blank" rel="noopener">Check it ↗</a></div>`;
+}
 function shipLinks(ship) {
   const [page, rooms] = SHIP_LINKS[ship] || [];
   if (!page) return "";
@@ -699,6 +733,7 @@ function renderSailings() {
       <div class="ports">⚓ ${esc(s.port)} · ${esc(s.ports)}</div>
       <div class="pills"><span class="pill ${cls}">${lbl}</span>${s.adults ? '<span class="pill adult">Adults only 18+</span>' : ""}</div>
       ${s.note ? `<div class="note">${esc(s.note)}</div>` : ""}
+      ${aftLine(s)}
       ${shipLinks(s.ship)}
       <div class="foot">
         <div class="price">${s.fare ? money(s.fare) : "Call"}<small>${s.fare ? "per man · " + esc(cabinLabel(s.cabin)) : "call for a price"}</small></div>
